@@ -572,37 +572,37 @@ def collection_form():
         mes = st.number_input("Mês", min_value=1, max_value=12)
         ano = st.number_input("Ano", min_value=2024)
         senha_empresa = st.text_input("Senha da Empresa", type="password")
-
-        # Listas de tipos de resíduos disponíveis
-        tipos_residuos = [
-            "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
+        
+        residuos = {}
+        tipo_residuo = st.selectbox("Tipo de Resíduo", [
+            "Nenhum elemento", "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
             "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
             "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
             "entulho_construcao", "madeira", "paletes", "serragem",
             "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
             "materia_organica", "cobre"
-        ]
-
-        # Dicionário para armazenar os volumes de cada tipo de resíduo
-        volumes_residuos = {}
-
-        for tipo in tipos_residuos:
-            volume = st.number_input(f"Volume Coletado para {tipo.capitalize()} (Kg)", min_value=0.01, value=0.0, key=f"volume_{tipo}")
-            volumes_residuos[tipo] = volume
-
-        # Adicionar campo para inserir valor
-        valor = st.number_input("Valor Coletado", min_value=0.0)
+        ])
+        
+        while tipo_residuo != "Nenhum elemento":
+            volume = st.number_input(f"Volume Coletado de {tipo_residuo} (Kg)", min_value=0.01, key=f"volume_{len(residuos)}")
+            residuos[tipo_residuo] = volume
+            if not st.checkbox("Tem mais resíduo?"):
+                break
+            tipo_residuo = st.selectbox("Tipo de Resíduo", [
+                "Nenhum elemento", "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
+                "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
+                "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
+                "entulho_construcao", "madeira", "paletes", "serragem",
+                "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
+                "materia_organica", "cobre"
+            ], key=f"tipo_residuo_{len(residuos)}")
 
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
-            for tipo, volume in volumes_residuos.items():
-                if volume > 0:
-                    result_message = check_table_existence(senha_empresa, username, dia, mes, ano, tipo, volume)
-                    st.write(result_message)
-collection_form()
+            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, residuos)
+            st.write(result_message)
 
-# Criar a tabela de usuários se ainda não existir
-create_user_table()
+collection_form()
 
 # Executar o site
 home()
