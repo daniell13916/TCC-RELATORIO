@@ -1,0 +1,7 @@
+matplotlib==3.8.4
+psycopg2-binary==2.9.9
+session_info==1.0.0
+sqlalchemy==1.4.25
+streamlit==1.33.0
+
+
