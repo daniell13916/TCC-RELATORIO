@@ -626,7 +626,7 @@ def collection_form():
             ], key=f"tipo_residuo_{i}")
 
             if tipo_residuo != "Nenhum elemento":
-                volume = st.number_input(f"Volume Coletado de {tipo_residuo} (Kg)", min_value=0.01, key=f"volume_{i}")
+               st.write=" "
                 if i == len(st.session_state.residuos):
                     st.session_state.residuos.append((tipo_residuo, volume))
                 else:
