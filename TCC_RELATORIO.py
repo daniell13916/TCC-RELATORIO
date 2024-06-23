@@ -560,32 +560,33 @@ def generate_report(senha_empresa, data_inicio, data_fim):
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
 
-# Função para exibir o formulário de coleta
+# Interface do usuário utilizando Streamlit
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
+
+    # Formulário para registro de coleta
     with st.form("registro_coleta_form"):
         st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
         username = st.text_input("Nome do Coletor")
         dia = st.number_input("Dia", min_value=1, max_value=31)
         mes = st.number_input("Mês", min_value=1, max_value=12)
         ano = st.number_input("Ano", min_value=2024)
-        volume = st.number_input("Volume Coletado (Kg)", min_value=0.01)
         senha_empresa = st.text_input("Senha da Empresa", type="password")
+        
+        # Select box para selecionar o tipo de resíduo
+        tipo_residuo = st.selectbox("Tipo de Resíduo", [
+            "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
+            "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
+            "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
+            "entulho_construcao", "madeira", "paletes", "serragem",
+            "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
+            "materia_organica", "cobre"
+        ])
 
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
-            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume)
+            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, tipo_residuo)
             st.write(result_message)
-
-    with st.form("gerar_relatorio_form"):
-        st.markdown("<h1 style='color: #38b6ff;'>Gerar Relatório</h1>", unsafe_allow_html=True)
-        data_inicio = st.date_input("Data de Início")
-        data_fim = st.date_input("Data Final")
-        senha_relatorio = st.text_input("Senha da Empresa para Relatório", type="password")
-        submit_button_relatorio = st.form_submit_button("Gerar Relatório")
-        
-        if submit_button_relatorio:
-            generate_report(senha_relatorio, data_inicio, data_fim)
 
 collection_form()
 
