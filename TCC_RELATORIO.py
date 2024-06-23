@@ -599,6 +599,8 @@ def collection_form():
                 if volume > 0:
                     result_message = check_table_existence(senha_empresa, username, dia, mes, ano, tipo, volume)
                     st.write(result_message)
+collection_form()
+
 # Criar a tabela de usuários se ainda não existir
 create_user_table()
 
