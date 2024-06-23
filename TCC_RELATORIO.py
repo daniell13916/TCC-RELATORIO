@@ -178,6 +178,10 @@ def register():
       st.write(" ")
 register()
 
+import psycopg2
+import streamlit as st
+import matplotlib.pyplot as plt
+
 # Função para verificar a existência da tabela da empresa e registrar a coleta
 def check_table_existence(senha_empresa, username, dia, mes, ano, residuos):
     try:
@@ -215,29 +219,84 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, residuos):
         tabela_existe = cur.fetchone()[0]
 
         if tabela_existe:
-            # Para cada resíduo, inserir ou atualizar os valores na tabela da empresa
+            # Para cada resíduo, inserir os valores na tabela da empresa
             for tipo_residuo, volume in residuos.items():
-                consulta_atualizacao = f"""
-                    INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, nome_coletor, {tipo_residuo})
-                    VALUES (%s, %s, %s, %s, %s)
-                    ON CONFLICT (data, nome_coletor) DO UPDATE SET
-                    {tipo_residuo} = COALESCE("Dados de coleta".{empresa}.{tipo_residuo}, 0) + EXCLUDED.{tipo_residuo};
-                """
-                cur.execute(consulta_atualizacao, (f'{ano}-{mes}-{dia}', mes, ano, username, volume))
-            
+                cur.execute(f"""
+                    INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, volume, nome_coletor, {tipo_residuo})
+                    VALUES (%s, %s, %s, %s, %s, %s);
+                """, (f'{ano}-{mes}-{dia}', mes, ano, volume, username, volume))
+
             conn.commit()
-
-            # Fechar o cursor e a conexão com o banco de dados
-            cur.close()
-            conn.close()
-
-            return f"Coleta registrada com sucesso para a empresa '{empresa}'."
-        
+            return f"Dados inseridos na tabela '{empresa}'."
         else:
-            return f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'."
+            return f"A tabela '{empresa}' não existe. [Criar conta](https://seulixo.streamlit.app/)"
 
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
+    finally:
+        cur.close()
+        conn.close()
+
+# Função para o formulário de registro de coleta
+def collection_form():
+    st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
+    residuos = {}
+    with st.form("registro_coleta_form"):
+        st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
+        username = st.text_input("Nome do Coletor")
+        dia = st.number_input("Dia", min_value=1, max_value=31)
+        mes = st.number_input("Mês", min_value=1, max_value=12)
+        ano = st.number_input("Ano", min_value=2024)
+        senha_empresa = st.text_input("Senha da Empresa", type="password")
+
+        # Inicializa uma sessão para armazenar os resíduos
+        if "residuos" not in st.session_state:
+            st.session_state.residuos = []
+
+        # Função para adicionar mais um resíduo
+        def add_residuo():
+            st.session_state.residuos.append({"tipo_residuo": "", "volume": 0})
+
+        if st.button("Adicionar elemento"):
+            add_residuo()
+
+        for i, res in enumerate(st.session_state.residuos):
+            tipo_residuo = st.selectbox(
+                f"Tipo de Resíduo {i+1}",
+                ["Plástico", "Vidro", "Papel", "Papelão", "Alumínio", "Aço", 
+                 "Resíduos Eletrônicos", "Pilhas e Baterias", "Folhas e Galhos", 
+                 "Tetrapak", "Pneus", "Óleo de Cozinha", "CDs e DVDs", 
+                 "Cartuchos de Tinta", "Entulho de Construção", "Madeira", 
+                 "Paletes", "Serragem", "Produtos Químicos", "Medicamentos", 
+                 "Lâmpadas Fluorescentes", "Matéria Orgânica", "Cobre"],
+                key=f"tipo_residuo_{i}"
+            )
+            volume = st.number_input(
+                f"Volume Coletado de {tipo_residuo} (Kg)", 
+                min_value=0.0, 
+                key=f"volume_{i}"
+            )
+            st.session_state.residuos[i] = {"tipo_residuo": tipo_residuo.lower().replace(" ", "_"), "volume": volume}
+
+        submit_button_cadastro = st.form_submit_button("Registrar Coleta")
+        if submit_button_cadastro:
+            residuos_dict = {res['tipo_residuo']: res['volume'] for res in st.session_state.residuos}
+            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, residuos_dict)
+            st.write(result_message)
+            st.session_state.residuos = []
+
+    with st.form("gerar_relatorio_form"):
+        st.markdown("<h1 style='color: #38b6ff;'>Gerar Relatório</h1>", unsafe_allow_html=True)
+        data_inicio = st.date_input("Data de Início")
+        data_fim = st.date_input("Data Final")
+        senha_relatorio = st.text_input("Senha da Empresa para Relatório", type="password")
+        submit_button_relatorio = st.form_submit_button("Gerar Relatório")
+        
+        if submit_button_relatorio:
+            generate_report(senha_relatorio, data_inicio, data_fim)
+
+collection_form()
+
         
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
 # e criar um gráfico de pizza com base nesses valores
