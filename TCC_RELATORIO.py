@@ -211,7 +211,6 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
 # e criar um gráfico de pizza com base nesses valores
 def buscar_valores_e_criar_grafico(senha):
-    # Criar um cursor para executar consultas
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
@@ -223,46 +222,79 @@ def buscar_valores_e_criar_grafico(senha):
 
         # Criar um cursor para executar consultas
         cur = conn.cursor()
-        # Consulta para obter os valores das colunas específicas da tabela "users" para a linha com a senha fornecida
+
+        # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
         cur.execute("""
-            SELECT "papel e papelão", "vidro", "plastico", "embalagem longa vida", "outros metais", "aluminio"
+            SELECT empresa
             FROM users
             WHERE password = %s;
         """, (senha,))
+        
+        # Obter o nome da empresa
+        empresa = cur.fetchone()[0]
 
-        # Obter os resultados da consulta
-        valores = cur.fetchone()
+        # Verificar se a tabela da empresa existe no esquema "Dados de coleta"
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'Dados de coleta'
+                AND table_name = %s
+            );
+        """, (empresa,))
+        
+        tabela_existe = cur.fetchone()[0]
 
-        # Fechar o cursor e a conexão com o banco de dados
-        cur.close()
-        conn.close()
+        if tabela_existe:
+            # Montar a consulta para obter os dados da tabela da empresa
+            consulta_dados_empresa = f"""
+                SELECT plastico, vidro, papel, papelao, aluminio, aco,
+                       residuos_eletronicos, pilhas_baterias, folhas_galhos,
+                       tetrapak, pneus, oleo_cozinha, cds_dvds, cartuchos_tinta,
+                       entulho_construcao, madeira, paletes, serragem,
+                       produtos_quimicos, medicamentos, lampadas_fluorescentes,
+                       materia_organica, cobre
+                FROM "Dados de coleta".{empresa};
+            """
+            
+            # Executar a consulta para obter os dados da tabela da empresa
+            cur.execute(consulta_dados_empresa)
+            dados_empresa = cur.fetchone()
 
-        # Filtrar colunas que têm valores diferentes de zero ou None
-        valores_validos = [valor for valor in valores if valor is not None and valor != 0]
+            # Fechar o cursor e a conexão com o banco de dados
+            cur.close()
+            conn.close()
 
+            # Filtrar os valores válidos (diferentes de zero e não None)
+            rotulos = [
+                "Plástico", "Vidro", "Papel", "Papelão", "Alumínio", "Aço",
+                "Resíduos Eletrônicos", "Pilhas e Baterias", "Folhas e Galhos",
+                "Tetrapak", "Pneus", "Óleo de Cozinha", "CDs e DVDs", "Cartuchos de Tinta",
+                "Entulho de Construção", "Madeira", "Paletes", "Serragem",
+                "Produtos Químicos", "Medicamentos", "Lâmpadas Fluorescentes",
+                "Matéria Orgânica", "Cobre"
+            ]
+            valores_validos = [valor for valor in dados_empresa if valor is not None and valor != 0]
 
-        # Criar os rótulos para as colunas correspondentes aos valores válidos
-        rotulos = ["Papel e papelão", "Vidro", "Plástico", "Embalagem longa vida", "Outros metais", "Alumínio"]
-        rotulos_validos = [rotulo for rotulo, valor in zip(rotulos, valores) if valor is not None and valor != 0]
+            # Calcular a média dos valores válidos
+            if valores_validos:
+                media_valores = [sum(valores_validos) / len(valores_validos)] * len(valores_validos)
+                
+                # Criar o gráfico de pizza
+                plt.figure(figsize=(8, 8))
+                plt.pie(media_valores, labels=rotulos, autopct='%1.1f%%')
+                plt.axis('equal')  # Aspecto igual garante que o gráfico seja desenhado como um círculo.
 
-        # Certificar-se de que os rótulos e os valores têm o mesmo comprimento
-        valores_validos = [valor for valor in valores if valor is not None and valor != 0]
+                # Exibir o gráfico
+                st.pyplot(plt)
+            else:
+                st.warning("Não há dados válidos para exibir no gráfico.")
 
-        # Atualizar os rótulos e os valores
-        rotulos = rotulos_validos
-        valores = valores_validos
-
-        # Criar o gráfico de pizza
-        plt.figure(figsize=(8, 8))
-        plt.pie(valores_validos, labels=rotulos, autopct='%1.1f%%')
-        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
-        # Exibir o gráfico
-        st.pyplot(plt)
+        else:
+            st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
 
     except psycopg2.Error as e:
-        st.error("Erro ao Gerar o gráfico!!")
-#verifica os valores das proporções do banco de dados
+        st.error(f"Erro ao conectar ao banco de dados: {e}")
 def buscar_valores_proporcoes(senha):
     try:
         # Conectar ao banco de dados PostgreSQL
