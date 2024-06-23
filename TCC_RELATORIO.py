@@ -570,7 +570,7 @@ def collection_form():
         username = st.text_input("Nome do Coletor")
         dia = st.number_input("Dia", min_value=1, max_value=31)
         mes = st.number_input("Mês", min_value=1, max_value=12)
-        ano = st.number_input("Ano", min_value=2024)
+        ano = st.number_input("Ano0", min_value=2024)
         senha_empresa = st.text_input("Senha da Empresa", type="password")
         
         # Select box para selecionar o tipo de resíduo
