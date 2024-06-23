@@ -560,7 +560,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
 
-# Interface do usuário utilizando Streamlit
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
 
@@ -583,19 +582,19 @@ def collection_form():
             "materia_organica", "cobre"
         ])
         
+        adicionar_elemento = st.form_submit_button("Adicionar elemento")
         while tipo_residuo != "Nenhum elemento":
-            volume = st.number_input(f"Volume Coletado de {tipo_residuo} (Kg)", min_value=0.01, key=f"volume_{len(residuos)}")
-            residuos[tipo_residuo] = volume
-            if not st.checkbox("Tem mais resíduo?"):
-                break
-            tipo_residuo = st.selectbox("Tipo de Resíduo", [
-                "Nenhum elemento", "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
-                "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
-                "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
-                "entulho_construcao", "madeira", "paletes", "serragem",
-                "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
-                "materia_organica", "cobre"
-            ], key=f"tipo_residuo_{len(residuos)}")
+            if adicionar_elemento:
+                volume = st.number_input(f"Volume Coletado de {tipo_residuo} (Kg)", min_value=0.01, key=f"volume_{len(residuos)}")
+                residuos[tipo_residuo] = volume
+                tipo_residuo = st.selectbox("Tipo de Resíduo", [
+                    "Nenhum elemento", "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
+                    "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
+                    "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
+                    "entulho_construcao", "madeira", "paletes", "serragem",
+                    "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
+                    "materia_organica", "cobre"
+                ], key=f"tipo_residuo_{len(residuos)}")
 
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
