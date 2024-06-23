@@ -238,7 +238,7 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, residuos):
 
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
-
+        
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
 # e criar um gráfico de pizza com base nesses valores
 def buscar_valores_e_criar_grafico(senha):
@@ -594,6 +594,10 @@ def generate_report(senha_empresa, data_inicio, data_fim):
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
 
+    # Inicializar o estado da sessão para controlar os resíduos adicionados
+    if 'residuos' not in st.session_state:
+        st.session_state.residuos = []
+    
     # Formulário para registro de coleta
     with st.form("registro_coleta_form"):
         st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
@@ -603,27 +607,33 @@ def collection_form():
         ano = st.number_input("Ano", min_value=2024)
         senha_empresa = st.text_input("Senha da Empresa", type="password")
         
-        residuos = {}
-        tipo_residuo = st.selectbox("Tipo de Resíduo", [
-            "Nenhum elemento", "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
-            "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
-            "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
-            "entulho_construcao", "madeira", "paletes", "serragem",
-            "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
-            "materia_organica", "cobre"
-        ], key=f"tipo_residuo")
+        # Loop para adicionar múltiplos resíduos
+        for i in range(len(st.session_state.residuos) + 1):
+            tipo_residuo = st.selectbox("Tipo de Resíduo", [
+                "Nenhum elemento", "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
+                "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
+                "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
+                "entulho_construcao", "madeira", "paletes", "serragem",
+                "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
+                "materia_organica", "cobre"
+            ], key=f"tipo_residuo_{i}")
 
-        if tipo_residuo != "Nenhum elemento":
-            volume = st.number_input(f"Volume Coletado de {tipo_residuo} (Kg)", min_value=0.01, key=f"volume")
-            residuos[tipo_residuo] = volume
+            if tipo_residuo != "Nenhum elemento":
+                volume = st.number_input(f"Volume Coletado de {tipo_residuo} (Kg)", min_value=0.01, key=f"volume_{i}")
+                if i == len(st.session_state.residuos):
+                    st.session_state.residuos.append((tipo_residuo, volume))
+                else:
+                    st.session_state.residuos[i] = (tipo_residuo, volume)
 
         adicionar_elemento = st.form_submit_button("Adicionar elemento")
 
         if adicionar_elemento:
+            st.session_state.residuos.append(("Nenhum elemento", 0))
             st.experimental_rerun()
 
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
+            residuos = {tipo: volume for tipo, volume in st.session_state.residuos if tipo != "Nenhum elemento"}
             result_message = check_table_existence(senha_empresa, username, dia, mes, ano, residuos)
             st.write(result_message)
 
