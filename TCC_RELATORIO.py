@@ -244,65 +244,6 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, residuos):
 
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
-# Função para o formulário de registro de coleta
-def collection_form():
-    st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
-    residuos = {}
-    with st.form("registro_coleta_form"):
-        st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
-        username = st.text_input("Nome do Coletor")
-        dia = st.number_input("Dia", min_value=1, max_value=31)
-        mes = st.number_input("Mês", min_value=1, max_value=12)
-        ano = st.number_input("Ano", min_value=2024)
-        senha_empresa = st.text_input("Senha da Empresa", type="password")
-
-        # Inicializa uma sessão para armazenar os resíduos
-        if "residuos" not in st.session_state:
-            st.session_state.residuos = []
-
-        # Função para adicionar mais um resíduo
-        def add_residuo():
-            st.session_state.residuos.append({"tipo_residuo": "", "volume": 0})
-
-        if st.button("Adicionar elemento"):
-            add_residuo()
-
-        for i, res in enumerate(st.session_state.residuos):
-            tipo_residuo = st.selectbox(
-                f"Tipo de Resíduo {i+1}",
-                ["Plástico", "Vidro", "Papel", "Papelão", "Alumínio", "Aço", 
-                 "Resíduos Eletrônicos", "Pilhas e Baterias", "Folhas e Galhos", 
-                 "Tetrapak", "Pneus", "Óleo de Cozinha", "CDs e DVDs", 
-                 "Cartuchos de Tinta", "Entulho de Construção", "Madeira", 
-                 "Paletes", "Serragem", "Produtos Químicos", "Medicamentos", 
-                 "Lâmpadas Fluorescentes", "Matéria Orgânica", "Cobre"],
-                key=f"tipo_residuo_{i}"
-            )
-            volume = st.number_input(
-                f"Volume Coletado de {tipo_residuo} (Kg)", 
-                min_value=0.0, 
-                key=f"volume_{i}"
-            )
-            st.session_state.residuos[i] = {"tipo_residuo": tipo_residuo.lower().replace(" ", "_"), "volume": volume}
-
-        submit_button_cadastro = st.form_submit_button("Registrar Coleta")
-        if submit_button_cadastro:
-            residuos_dict = {res['tipo_residuo']: res['volume'] for res in st.session_state.residuos}
-            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, residuos_dict)
-            st.write(result_message)
-            st.session_state.residuos = []
-
-    with st.form("gerar_relatorio_form"):
-        st.markdown("<h1 style='color: #38b6ff;'>Gerar Relatório</h1>", unsafe_allow_html=True)
-        data_inicio = st.date_input("Data de Início")
-        data_fim = st.date_input("Data Final")
-        senha_relatorio = st.text_input("Senha da Empresa para Relatório", type="password")
-        submit_button_relatorio = st.form_submit_button("Gerar Relatório")
-        
-        if submit_button_relatorio:
-            generate_report(senha_relatorio, data_inicio, data_fim)
-
-collection_form()
 
         
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
