@@ -590,14 +590,15 @@ def collection_form():
             volume = st.number_input(f"Volume Coletado para {tipo.capitalize()} (Kg)", min_value=0.01, value=0.0, key=f"volume_{tipo}")
             volumes_residuos[tipo] = volume
 
+        # Adicionar campo para inserir valor
+        valor = st.number_input("Valor Coletado", min_value=0.0)
+
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
             for tipo, volume in volumes_residuos.items():
                 if volume > 0:
                     result_message = check_table_existence(senha_empresa, username, dia, mes, ano, tipo, volume)
                     st.write(result_message)
-
-collection_form()
 # Criar a tabela de usuários se ainda não existir
 create_user_table()
 
