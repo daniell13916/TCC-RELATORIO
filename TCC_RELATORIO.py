@@ -178,10 +178,6 @@ def register():
       st.write(" ")
 register()
 
-import psycopg2
-import streamlit as st
-import matplotlib.pyplot as plt
-
 # Função para verificar a existência da tabela da empresa e registrar a coleta
 def check_table_existence(senha_empresa, username, dia, mes, ano, residuos):
     try:
@@ -219,24 +215,35 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, residuos):
         tabela_existe = cur.fetchone()[0]
 
         if tabela_existe:
-            # Para cada resíduo, inserir os valores na tabela da empresa
+            # Para cada resíduo, inserir ou atualizar os valores na tabela da empresa
             for tipo_residuo, volume in residuos.items():
+                # Primeiro, tentamos atualizar o registro existente
                 cur.execute(f"""
-                    INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, volume, nome_coletor, {tipo_residuo})
-                    VALUES (%s, %s, %s, %s, %s, %s);
-                """, (f'{ano}-{mes}-{dia}', mes, ano, volume, username, volume))
+                    UPDATE "Dados de coleta".{empresa}
+                    SET {tipo_residuo} = COALESCE({tipo_residuo}, 0) + %s
+                    WHERE data = %s AND nome_coletor = %s;
+                """, (volume, f'{ano}-{mes}-{dia}', username))
 
+                # Se nenhuma linha foi afetada pela atualização, inserimos um novo registro
+                if cur.rowcount == 0:
+                    cur.execute(f"""
+                        INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, nome_coletor, {tipo_residuo})
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (f'{ano}-{mes}-{dia}', mes, ano, username, volume))
+            
             conn.commit()
-            return f"Dados inseridos na tabela '{empresa}'."
+
+            # Fechar o cursor e a conexão com o banco de dados
+            cur.close()
+            conn.close()
+
+            return f"Coleta registrada com sucesso para a empresa '{empresa}'."
+        
         else:
-            return f"A tabela '{empresa}' não existe. [Criar conta](https://seulixo.streamlit.app/)"
+            return f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'."
 
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
-    finally:
-        cur.close()
-        conn.close()
-
 # Função para o formulário de registro de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
