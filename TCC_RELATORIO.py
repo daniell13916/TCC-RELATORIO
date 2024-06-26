@@ -301,20 +301,11 @@ def buscar_valores_proporcoes(senha):
         # Criar um cursor para executar consultas
         cur = conn.cursor()
 
-          # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
-        cur.execute("""
-            SELECT empresa
-            FROM users
-            WHERE password = %s;
-        """, (senha,))
-        
-        # Obter o nome da empresa
-        empresa = cur.fetchone()[0]
         
         # Consulta para obter as proporções do usuário com a senha fornecida
         cur.execute("""
             SELECT "aluminio", "pepel_e_papelao", "vidro", "plastico", "embalagem_longa_vida","outros_metais"
-            FROM empresa
+            FROM users
             WHERE password = %s;
         """, (senha,))
         proporcoes = cur.fetchone()
