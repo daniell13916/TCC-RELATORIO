@@ -273,15 +273,16 @@ def buscar_valores_e_criar_grafico(senha):
                 "Produtos Químicos", "Medicamentos", "Lâmpadas Fluorescentes",
                 "Matéria Orgânica", "Cobre"
             ]
-            valores_validos = [valor for valor in dados_empresa if valor is not None and valor != 0]
 
-            # Calcular a média dos valores válidos
+            valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa) if valor is not None and valor != 0]
+
             if valores_validos:
-                media_valores = [sum(valores_validos) / len(valores_validos)] * len(valores_validos)
+                rotulos_validos, valores = zip(*valores_validos)
+                media_valores = [sum(valores) / len(valores)] * len(valores)
                 
                 # Criar o gráfico de pizza
                 plt.figure(figsize=(8, 8))
-                plt.pie(media_valores, labels=rotulos, autopct='%1.1f%%')
+                plt.pie(media_valores, labels=rotulos_validos, autopct='%1.1f%%')
                 plt.axis('equal')  # Aspecto igual garante que o gráfico seja desenhado como um círculo.
 
                 # Exibir o gráfico
@@ -294,6 +295,7 @@ def buscar_valores_e_criar_grafico(senha):
 
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
+        
 #verifica os valores das proporções do banco de dados
 def buscar_valores_proporcoes(senha):
     try:
