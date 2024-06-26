@@ -53,7 +53,6 @@ def create_user_table():
         if conn:
             conn.close()
 
-
 #cria a tabela caso tenha novo cadastro e ela não exista
 def create_empresa(nome_empresa):
     try:
@@ -178,74 +177,36 @@ def register():
       st.write(" ")
 register()
 
-# Função para verificar a existência da tabela da empresa e registrar a coleta
-def check_table_existence(senha_empresa, username, dia, mes, ano, residuos):
+#ve se a tabela já existe e se tiver vai add os dados e se não tiver vai criar tabela com base na função create_empresa
+def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
     try:
-        # Conectar ao banco de dados PostgreSQL
-        conn = psycopg2.connect(
-            host="seulixo-aws.c7my4s6c6mqm.us-east-1.rds.amazonaws.com",
-            database="postgres",
-            user="postgres",
-            password="#SEUlixo321"
-        )
-
-        # Criar um cursor para executar consultas
-        cur = conn.cursor()
-
-        # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
-        cur.execute("""
-            SELECT empresa
-            FROM public.users
-            WHERE password = %s;
-        """, (senha_empresa,))
-        
-        # Obter o nome da empresa
-        empresa = cur.fetchone()[0]
-
-        # Verificar se a tabela da empresa existe no esquema "Dados de coleta"
-        cur.execute("""
-            SELECT EXISTS (
-                SELECT 1
-                FROM information_schema.tables
-                WHERE table_schema = 'Dados de coleta'
-                AND table_name = %s
-            );
-        """, (empresa,))
-        
-        tabela_existe = cur.fetchone()[0]
-
-        if tabela_existe:
-            # Para cada resíduo, inserir ou atualizar os valores na tabela da empresa
-            for tipo_residuo, volume in residuos.items():
-                # Primeiro, tentamos atualizar o registro existente
-                cur.execute(f"""
-                    UPDATE "Dados de coleta".{empresa}
-                    SET {tipo_residuo} = COALESCE({tipo_residuo}, 0) + %s
-                    WHERE data = %s AND nome_coletor = %s;
-                """, (volume, f'{ano}-{mes}-{dia}', username))
-
-                # Se nenhuma linha foi afetada pela atualização, inserimos um novo registro
-                if cur.rowcount == 0:
+        # Abrir um cursor para executar consultas SQL
+        with conn.cursor() as cur:
+            # Consulta SQL para verificar se a senha existe na tabela users e obter o ID e a empresa
+            cur.execute("SELECT id, empresa FROM public.users WHERE password = %s;", (senha_empresa,))
+            empresa_info = cur.fetchone()
+            if empresa_info:
+                user_id, empresa = empresa_info
+                
+                # Verificar a existência da tabela
+                cur.execute("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema = 'Dados de coleta' AND table_name = %s);", (empresa,))
+                table_exists = cur.fetchone()[0]
+                if table_exists:
+                    # Insere os dados na tabela existente
                     cur.execute(f"""
-                        INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, nome_coletor, {tipo_residuo})
-                        VALUES (%s, %s, %s, %s, %s)
-                    """, (f'{ano}-{mes}-{dia}', mes, ano, username, volume))
-            
-            conn.commit()
-
-            # Fechar o cursor e a conexão com o banco de dados
-            cur.close()
-            conn.close()
-
-            return f"Coleta registrada com sucesso para a empresa '{empresa}'."
-        
-        else:
-            return f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'."
-
+                        INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, volume, nome_coletor)
+                        VALUES (%s, %s, %s, %s, %s);
+                    """, (f'{ano}-{mes}-{dia}', mes, ano, volume, username))
+                    conn.commit()
+                    return f"Dados inseridos na tabela '{empresa}'."
+                else:
+                    return f"A tabela '{empresa}' não existe."
+            else:
+                # Senha da empresa não encontrada, adicionar link "Criar conta"
+                return "Senha da empresa não encontrada. [Criar conta](https://seulixo.streamlit.app/)"
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
 
-        
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
 # e criar um gráfico de pizza com base nesses valores
 def buscar_valores_e_criar_grafico(senha):
@@ -333,6 +294,7 @@ def buscar_valores_e_criar_grafico(senha):
 
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
+#verifica os valores das proporções do banco de dados
 def buscar_valores_proporcoes(senha):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -597,53 +559,38 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
-# Interface do usuário utilizando Streamlit
+
+# Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
-
-    # Inicializar o estado da sessão para controlar os resíduos adicionados
-    if 'residuos' not in st.session_state:
-        st.session_state.residuos = []
-    
-    # Formulário para registro de coleta
     with st.form("registro_coleta_form"):
         st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
         username = st.text_input("Nome do Coletor")
         dia = st.number_input("Dia", min_value=1, max_value=31)
         mes = st.number_input("Mês", min_value=1, max_value=12)
         ano = st.number_input("Ano", min_value=2024)
+        volume = st.number_input("Volume Coletado (Kg)", min_value=0.01)
         senha_empresa = st.text_input("Senha da Empresa", type="password")
-        
-        # Loop para adicionar múltiplos resíduos
-        for i in range(len(st.session_state.residuos) + 1):
-            tipo_residuo = st.selectbox("Tipo de Resíduo", [
-                "Nenhum elemento", "plastico", "vidro", "papel", "papelao", "aluminio", "aco",
-                "residuos_eletronicos", "pilhas_baterias", "folhas_galhos",
-                "tetrapak", "pneus", "oleo_cozinha", "cds_dvds", "cartuchos_tinta",
-                "entulho_construcao", "madeira", "paletes", "serragem",
-                "produtos_quimicos", "medicamentos", "lampadas_fluorescentes",
-                "materia_organica", "cobre"
-            ], key=f"tipo_residuo_{i}")
-
-            if tipo_residuo != "Nenhum elemento":
-                st.write=" "
-                if i == len(st.session_state.residuos):
-                    st.session_state.residuos.append((tipo_residuo, volume))
-                else:
-                    st.session_state.residuos[i] = (tipo_residuo, volume)
-
-        adicionar_elemento = st.form_submit_button("Adicionar elemento")
-
-        if adicionar_elemento:
-            st.session_state.residuos.append(("Nenhum elemento", 0))
-            st.experimental_rerun()
 
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
-            residuos = {tipo: volume for tipo, volume in st.session_state.residuos if tipo != "Nenhum elemento"}
-            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, residuos)
+            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume)
             st.write(result_message)
 
+    with st.form("gerar_relatorio_form"):
+        st.markdown("<h1 style='color: #38b6ff;'>Gerar Relatório</h1>", unsafe_allow_html=True)
+        data_inicio = st.date_input("Data de Início")
+        data_fim = st.date_input("Data Final")
+        senha_relatorio = st.text_input("Senha da Empresa para Relatório", type="password")
+        submit_button_relatorio = st.form_submit_button("Gerar Relatório")
+        
+        if submit_button_relatorio:
+            generate_report(senha_relatorio, data_inicio, data_fim)
+
 collection_form()
+
+# Criar a tabela de usuários se ainda não existir
+create_user_table()
+
 # Executar o site
 home()
