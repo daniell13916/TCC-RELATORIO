@@ -287,7 +287,6 @@ def buscar_valores_e_criar_grafico(senha):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         
-#verifica os valores das proporções do banco de dados
 def buscar_valores_proporcoes(senha):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -301,21 +300,53 @@ def buscar_valores_proporcoes(senha):
         # Criar um cursor para executar consultas
         cur = conn.cursor()
 
-        
-        # Consulta para obter as proporções do usuário com a senha fornecida
+        # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
         cur.execute("""
-            SELECT "aluminio", "pepel_e_papelao", "vidro", "plastico", "embalagem_longa_vida","outros_metais"
+            SELECT empresa
             FROM users
             WHERE password = %s;
         """, (senha,))
-        proporcoes = cur.fetchone()
-        cur.close()
-        conn.close()  # Fechar a conexão após a conclusão das operações no banco de dados
-        return proporcoes
+        
+        # Obter o nome da empresa
+        empresa = cur.fetchone()[0]
+
+        # Verificar se a tabela da empresa existe no esquema "Dados de coleta"
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'Dados de coleta'
+                AND table_name = %s
+            );
+        """, (empresa,))
+        
+        tabela_existe = cur.fetchone()[0]
+
+        if tabela_existe:
+            # Montar a consulta para obter os dados da tabela da empresa
+            consulta_proporcoes_empresa = f"""
+                SELECT aluminio, papel_e_papelao, vidro, plastico, embalagem_longa_vida, outros_metais
+                FROM "Dados de coleta".{empresa};
+            """
+            
+            # Executar a consulta para obter os dados da tabela da empresa
+            cur.execute(consulta_proporcoes_empresa)
+            proporcoes = cur.fetchone()
+
+            # Fechar o cursor e a conexão com o banco de dados
+            cur.close()
+            conn.close()
+
+            return proporcoes
+
+        else:
+            st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
+            return None
+
     except psycopg2.Error as e:
-        print("Erro ao buscar proporções do usuário:", e)
+        st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
-#aqui já cria as variáveis 
+
 def solicitar_proporcoes(senha_empresa):
     proporcoes = buscar_valores_proporcoes(senha_empresa)  # Não é necessário passar conn aqui
     if proporcoes:
