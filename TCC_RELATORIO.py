@@ -209,6 +209,7 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
 
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
 # e criar um gráfico de pizza com base nesses valores
+
 def buscar_valores_e_criar_grafico(senha):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -278,11 +279,10 @@ def buscar_valores_e_criar_grafico(senha):
 
             if valores_validos:
                 rotulos_validos, valores = zip(*valores_validos)
-                media_valores = [sum(valores) / len(valores)] * len(valores)
                 
                 # Criar o gráfico de pizza
                 plt.figure(figsize=(8, 8))
-                plt.pie(media_valores, labels=rotulos_validos, autopct='%1.1f%%')
+                plt.pie(valores, labels=rotulos_validos, autopct='%1.1f%%')
                 plt.axis('equal')  # Aspecto igual garante que o gráfico seja desenhado como um círculo.
 
                 # Exibir o gráfico
