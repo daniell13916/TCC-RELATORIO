@@ -348,17 +348,17 @@ def buscar_valores_proporcoes(senha):
         return None
 
 def solicitar_proporcoes(senha_empresa):
-    proporcoes = buscar_valores_proporcoes(senha_empresa)  # Não é necessário passar conn aqui
+    proporcoes = buscar_valores_proporcoes(senha_empresa)  # Chama a função para obter as proporções
     if proporcoes:
-        proporcao_plastico = proporcoes[0]
-        proporcao_vidro = proporcoes[1]
-        proporcao_papel_papelao = proporcoes[2]
-        proporcao_embalagem_longa_vida = proporcoes[3]
-        proporcao_outros_metais = proporcoes[4]
-        proporcao_aluminio = proporcoes[5]
+        proporcao_plastico = proporcoes[3] if proporcoes[3] is not None else 0
+        proporcao_vidro = proporcoes[2] if proporcoes[2] is not None else 0
+        proporcao_papel_papelao = proporcoes[1] if proporcoes[1] is not None else 0
+        proporcao_embalagem_longa_vida = proporcoes[4] if proporcoes[4] is not None else 0
+        proporcao_outros_metais = proporcoes[5] if proporcoes[5] is not None else 0
+        proporcao_aluminio = proporcoes[0] if proporcoes[0] is not None else 0
         return proporcao_plastico, proporcao_vidro, proporcao_papel_papelao, proporcao_embalagem_longa_vida, proporcao_outros_metais, proporcao_aluminio
     else:
-        print("Não foi possível obter as proporções do usuário.")
+        st.error("Não foi possível obter as proporções do usuário.")
         return None
 
 def calcular_economias(porcentagem_plastico, porcentagem_vidro, porcentagem_papel_papelao, porcentagem_embalagem_longa_vida, porcentagem_outros_metais, porcentagem_aluminio, volume_destinado_corretamente):
