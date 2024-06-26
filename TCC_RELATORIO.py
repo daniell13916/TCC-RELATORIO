@@ -248,12 +248,7 @@ def buscar_valores_e_criar_grafico(senha):
         if tabela_existe:
             # Montar a consulta para obter os dados da tabela da empresa
             consulta_dados_empresa = f"""
-                SELECT plastico, vidro, papel, papelao, aluminio, aco,
-                       residuos_eletronicos, pilhas_baterias, folhas_galhos,
-                       tetrapak, pneus, oleo_cozinha, cds_dvds, cartuchos_tinta,
-                       entulho_construcao, madeira, paletes, serragem,
-                       produtos_quimicos, medicamentos, lampadas_fluorescentes,
-                       materia_organica, cobre
+                SELECT plastico, vidro, papel_e_papelao, aluminio, outros_metais, embalagem_longa_vida
                 FROM "Dados de coleta".{empresa};
             """
             
@@ -267,12 +262,8 @@ def buscar_valores_e_criar_grafico(senha):
 
             # Filtrar os valores válidos (diferentes de zero e não None)
             rotulos = [
-                "Plástico", "Vidro", "Papel", "Papelão", "Alumínio", "Aço",
-                "Resíduos Eletrônicos", "Pilhas e Baterias", "Folhas e Galhos",
-                "Tetrapak", "Pneus", "Óleo de Cozinha", "CDs e DVDs", "Cartuchos de Tinta",
-                "Entulho de Construção", "Madeira", "Paletes", "Serragem",
-                "Produtos Químicos", "Medicamentos", "Lâmpadas Fluorescentes",
-                "Matéria Orgânica", "Cobre"
+                "Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais",
+                "Embalagem Longa Vida"
             ]
 
             valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa) if valor is not None and valor != 0]
