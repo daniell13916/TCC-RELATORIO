@@ -289,7 +289,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
         st.error(f"Erro ao conectar ao banco de dados: {e}")
 
         
-def buscar_valores_proporcoes(senha):
+def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
@@ -325,14 +325,21 @@ def buscar_valores_proporcoes(senha):
         tabela_existe = cur.fetchone()[0]
 
         if tabela_existe:
-            # Montar a consulta para obter os dados da tabela da empresa
+            # Montar a consulta para obter a média dos dados da tabela da empresa no intervalo de tempo especificado
             consulta_proporcoes_empresa = f"""
-                SELECT aluminio, papel_e_papelao, vidro, plastico, embalagem_longa_vida, outros_metais
-                FROM "Dados de coleta".{empresa};
+                SELECT 
+                    AVG(aluminio), 
+                    AVG(papel_e_papelao), 
+                    AVG(vidro), 
+                    AVG(plastico), 
+                    AVG(embalagem_longa_vida), 
+                    AVG(outros_metais)
+                FROM "Dados de coleta".{empresa}
+                WHERE data >= %s AND data <= %s;
             """
             
             # Executar a consulta para obter os dados da tabela da empresa
-            cur.execute(consulta_proporcoes_empresa)
+            cur.execute(consulta_proporcoes_empresa, (data_inicio, data_fim))
             proporcoes = cur.fetchone()
 
             # Fechar o cursor e a conexão com o banco de dados
@@ -456,7 +463,6 @@ def calcular_economias(porcentagem_plastico, porcentagem_vidro, porcentagem_pape
         "Economia de Árvores (%)": format(round(economia_arvores/100, 2), '.2f'),
         "Economia de Petróleo (litros)": format(round(economia_petroleo/100, 2), '.2f')
     }
-# Função para gerar o relatório
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -523,7 +529,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
                         # Calcular economias com base nas proporções
-                        proporcoes = solicitar_proporcoes(senha_empresa)
+                        proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
                         if proporcoes:
                             resultado = calcular_economias(*proporcoes, volume_destinado_corretamente)
     
