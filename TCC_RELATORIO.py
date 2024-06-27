@@ -371,29 +371,14 @@ def solicitar_proporcoes(senha_empresa, data_inicio, data_fim):
         return None
 
 
-def calcular_economias(porcentagem_plastico, porcentagem_vidro, porcentagem_papel_papelao, porcentagem_embalagem_longa_vida, porcentagem_outros_metais, porcentagem_aluminio, volume_destinado_corretamente):
-    total_kg = float(volume_destinado_corretamente)
-    
-    if porcentagem_plastico is not None:
-        porcentagem_plastico = float(porcentagem_plastico)
-    if porcentagem_vidro is not None:
-        porcentagem_vidro = float(porcentagem_vidro)
-    if porcentagem_papel_papelao is not None:
-        porcentagem_papel_papelao = float(porcentagem_papel_papelao)
-    if porcentagem_embalagem_longa_vida is not None:
-        porcentagem_embalagem_longa_vida = float(porcentagem_embalagem_longa_vida)
-    if porcentagem_outros_metais is not None:
-        porcentagem_outros_metais = float(porcentagem_outros_metais)
-    if porcentagem_aluminio is not None:
-        porcentagem_aluminio = float(porcentagem_aluminio)
-
+def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, aluminio, volume_destinado_corretamente):
     # Calcular peso de cada tipo de resíduo
-    peso_plastico = total_kg*porcentagem_plastico if porcentagem_plastico is not None else 0
-    peso_vidro = total_kg*porcentagem_vidro if porcentagem_vidro is not None else 0
-    peso_papel_papelao =total_kg*porcentagem_papel_papelao if porcentagem_papel_papelao is not None else 0
-    peso_embalagem_longa_vida =total_kg*porcentagem_embalagem_longa_vida if porcentagem_embalagem_longa_vida is not None else 0
-    peso_outros_metais =  total_kg*porcentagem_outros_metais if porcentagem_outros_metais is not None else 0
-    peso_aluminio =total_kg*porcentagem_aluminio if porcentagem_aluminio is not None else 0
+    peso_papel_papelao = float(papel_papelao) if papel_papelao is not None else 0
+    peso_vidro = float(vidro) if vidro is not None else 0
+    peso_plastico = float(plastico) if plastico is not None else 0
+    peso_embalagem_longa_vida = float(embalagem_longa_vida) if embalagem_longa_vida is not None else 0
+    peso_outros_metais = float(outros_metais) if outros_metais is not None else 0
+    peso_aluminio = float(aluminio) if aluminio is not None else 0
 
     # Proporções fornecidas pelo Cataki
     proporcoes = {
@@ -457,13 +442,14 @@ def calcular_economias(porcentagem_plastico, porcentagem_vidro, porcentagem_pape
     economia_petroleo += peso_aluminio * proporcoes["aluminio"]["petroleo"]
 
     return {
-        "Economia de Energia (kWh)": format(round(economia_energia/100, 2), '.2f'),
-        "Economia de Água (litros)": format(round(economia_agua/100, 2), '.2f'),
-        "Redução de CO2 (kg)": format(round(economia_co2/100, 2), '.2f'),
-        "Redução de Volume no Aterro (litros)": format(round(economia_volume_aterrro/100, 2), '.2f'),
-        "Economia de Árvores (%)": format(round(economia_arvores/100, 2), '.2f'),
-        "Economia de Petróleo (litros)": format(round(economia_petroleo/100, 2), '.2f')
+        "Economia de Energia (kWh)": format(round(economia_energia, 2), '.2f'),
+        "Economia de Água (litros)": format(round(economia_agua, 2), '.2f'),
+        "Redução de CO2 (kg)": format(round(economia_co2, 2), '.2f'),
+        "Redução de Volume no Aterro (litros)": format(round(economia_volume_aterrro, 2), '.2f'),
+        "Economia de Árvores (%)": format(round(economia_arvores, 2), '.2f'),
+        "Economia de Petróleo (litros)": format(round(economia_petroleo, 2), '.2f')
     }
+
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
