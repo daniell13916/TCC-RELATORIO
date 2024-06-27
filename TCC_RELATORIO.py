@@ -368,16 +368,15 @@ def solicitar_proporcoes(senha_empresa, data_inicio, data_fim):
         proporcao_aluminio = proporcoes[0] if proporcoes[0] is not None else 0
         
         return proporcao_plastico, proporcao_vidro, proporcao_papel_papelao, proporcao_embalagem_longa_vida, proporcao_outros_metais, proporcao_aluminio
+        st.write(proporcao_plastico)
+        st.write(proporcao_vidro)
+        st.write(proporcao_papel_papelao)
+        st.write(proporcao_embalagem_longa_vida)
+        st.write(proporcao_outros_metais)
+        st.write(proporcao_aluminio)
     else:
         st.error("Não foi possível obter as proporções do usuário.")
         return None
-
-st.write(proporcao_plastico)
-st.write(proporcao_vidro)
-st.write(proporcao_papel_papelao)
-st.write(proporcao_embalagem_longa_vida)
-st.write(proporcao_outros_metais)
-st.write(proporcao_aluminio)
 
 def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, aluminio, volume_destinado_corretamente):
     # Calcular peso de cada tipo de resíduo
