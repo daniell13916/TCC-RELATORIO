@@ -356,8 +356,8 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def solicitar_proporcoes(senha_empresa):
-    proporcoes = buscar_valores_proporcoes(senha_empresa)  # Chama a função para obter as proporções
+def solicitar_proporcoes(senha_empresa, data_inicio, data_fim):
+    proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)  # Chama a função para obter as proporções com intervalo de tempo
     if proporcoes:
         proporcao_plastico = proporcoes[3] if proporcoes[3] is not None else 0
         proporcao_vidro = proporcoes[2] if proporcoes[2] is not None else 0
@@ -369,6 +369,7 @@ def solicitar_proporcoes(senha_empresa):
     else:
         st.error("Não foi possível obter as proporções do usuário.")
         return None
+
 
 def calcular_economias(porcentagem_plastico, porcentagem_vidro, porcentagem_papel_papelao, porcentagem_embalagem_longa_vida, porcentagem_outros_metais, porcentagem_aluminio, volume_destinado_corretamente):
     total_kg = float(volume_destinado_corretamente)
