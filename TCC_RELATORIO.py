@@ -388,20 +388,12 @@ def calcular_economias(porcentagem_plastico, porcentagem_vidro, porcentagem_pape
         porcentagem_aluminio = float(porcentagem_aluminio)
 
     # Calcular peso de cada tipo de resíduo
-    peso_plastico = porcentagem_plastico if porcentagem_plastico is not None else 0
-    peso_vidro = porcentagem_vidro if porcentagem_vidro is not None else 0
-    peso_papel_papelao =porcentagem_papel_papelao if porcentagem_papel_papelao is not None else 0
-    peso_embalagem_longa_vida =porcentagem_embalagem_longa_vida if porcentagem_embalagem_longa_vida is not None else 0
-    peso_outros_metais =  porcentagem_outros_metais if porcentagem_outros_metais is not None else 0
-    peso_aluminio =porcentagem_aluminio if porcentagem_aluminio is not None else 0
-
-    st.write(peso_plastico)
-    st.write(peso_vidro)
-    st.write(peso_papel_papelao)
-    st.write(peso_embalagem_longa_vida)
-    st.write(peso_aluminio)
-    st.write(peso_outros_metais)
-    
+    peso_plastico = total_kg*porcentagem_plastico if porcentagem_plastico is not None else 0
+    peso_vidro = total_kg*porcentagem_vidro if porcentagem_vidro is not None else 0
+    peso_papel_papelao =total_kg*porcentagem_papel_papelao if porcentagem_papel_papelao is not None else 0
+    peso_embalagem_longa_vida =total_kg*porcentagem_embalagem_longa_vida if porcentagem_embalagem_longa_vida is not None else 0
+    peso_outros_metais =  total_kg*porcentagem_outros_metais if porcentagem_outros_metais is not None else 0
+    peso_aluminio =total_kg*porcentagem_aluminio if porcentagem_aluminio is not None else 0
 
     # Proporções fornecidas pelo Cataki
     proporcoes = {
