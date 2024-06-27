@@ -210,7 +210,7 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
 # e criar um gráfico de pizza com base nesses valores
 
-def buscar_valores_e_criar_grafico(senha):
+def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
@@ -246,14 +246,15 @@ def buscar_valores_e_criar_grafico(senha):
         tabela_existe = cur.fetchone()[0]
 
         if tabela_existe:
-            # Montar a consulta para obter os dados da tabela da empresa
+            # Montar a consulta para obter os dados da tabela da empresa no intervalo de tempo especificado
             consulta_dados_empresa = f"""
-                SELECT plastico, vidro, papel_e_papelao, aluminio, outros_metais, embalagem_longa_vida
-                FROM "Dados de coleta".{empresa};
+                SELECT AVG(plastico), AVG(vidro), AVG(papel_e_papelao), AVG(aluminio), AVG(outros_metais), AVG(embalagem_longa_vida)
+                FROM "Dados de coleta".{empresa}
+                WHERE data >= %s AND data <= %s;
             """
             
             # Executar a consulta para obter os dados da tabela da empresa
-            cur.execute(consulta_dados_empresa)
+            cur.execute(consulta_dados_empresa, (data_inicio, data_fim))
             dados_empresa = cur.fetchone()
 
             # Fechar o cursor e a conexão com o banco de dados
@@ -286,6 +287,7 @@ def buscar_valores_e_criar_grafico(senha):
 
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
+
         
 def buscar_valores_proporcoes(senha):
     try:
