@@ -288,7 +288,8 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
 
-        
+import psycopg2
+
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -325,15 +326,15 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
         tabela_existe = cur.fetchone()[0]
 
         if tabela_existe:
-            # Montar a consulta para obter a média dos dados da tabela da empresa no intervalo de tempo especificado
+            # Montar a consulta para obter a soma dos dados da tabela da empresa no intervalo de tempo especificado
             consulta_proporcoes_empresa = f"""
                 SELECT 
-                    AVG(aluminio), 
-                    AVG(papel_e_papelao), 
-                    AVG(vidro), 
-                    AVG(plastico), 
-                    AVG(embalagem_longa_vida), 
-                    AVG(outros_metais)
+                    SUM(aluminio), 
+                    SUM(papel_e_papelao), 
+                    SUM(vidro), 
+                    SUM(plastico), 
+                    SUM(embalagem_longa_vida), 
+                    SUM(outros_metais)
                 FROM "Dados de coleta".{empresa}
                 WHERE data >= %s AND data <= %s;
             """
@@ -369,7 +370,6 @@ def solicitar_proporcoes(senha_empresa, data_inicio, data_fim):
     else:
         st.error("Não foi possível obter as proporções do usuário.")
         return None
-
 
 def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, aluminio, volume_destinado_corretamente):
     # Calcular peso de cada tipo de resíduo
