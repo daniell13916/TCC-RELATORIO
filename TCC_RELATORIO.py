@@ -395,6 +395,14 @@ def calcular_economias(porcentagem_plastico, porcentagem_vidro, porcentagem_pape
     peso_outros_metais =  porcentagem_outros_metais if porcentagem_outros_metais is not None else 0
     peso_aluminio =porcentagem_aluminio if porcentagem_aluminio is not None else 0
 
+    st.write("peso_plastico")
+    st.write("peso_vidro")
+    st.write("peso_papel_papelao")
+    st.write("peso_embalagem_longa_vida")
+    st.write("peso_aluminio")
+    st.write("peso_outros_metais")
+    
+
     # Proporções fornecidas pelo Cataki
     proporcoes = {
         "papel_papelao": {"energia": 2.5, "agua": 48, "co2": 3.47, "volume_aterrro": 1.74, "arvores": 0.02, "petroleo": 0.4},
