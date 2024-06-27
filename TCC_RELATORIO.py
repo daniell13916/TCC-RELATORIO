@@ -373,12 +373,6 @@ def solicitar_proporcoes(senha_empresa, data_inicio, data_fim):
         return None
 
 def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, aluminio, volume_destinado_corretamente):
-    st.write(proporcao_plastico)
-    st.write(proporcao_vidro)
-    st.write(proporcao_papel_papelao)
-    st.write(proporcao_embalagem_longa_vida)
-    st.write(proporcao_outros_metais)
-    st.write(proporcao_aluminio)
     # Calcular peso de cada tipo de resíduo
     peso_papel_papelao = float(papel_papelao) if papel_papelao is not None else 0
     peso_vidro = float(vidro) if vidro is not None else 0
@@ -386,6 +380,9 @@ def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, out
     peso_embalagem_longa_vida = float(embalagem_longa_vida) if embalagem_longa_vida is not None else 0
     peso_outros_metais = float(outros_metais) if outros_metais is not None else 0
     peso_aluminio = float(aluminio) if aluminio is not None else 0
+    st.write("peso_papel_papelao")
+    st.write("peso_vidro")
+    st.write("peso_plastico")
 
     # Proporções fornecidas pelo Cataki
     proporcoes = {
