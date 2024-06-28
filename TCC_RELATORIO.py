@@ -207,12 +207,6 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
 
-import streamlit as st
-import psycopg2
-import matplotlib.pyplot as plt
-import time
-
-# Função para buscar proporções e criar gráfico de pizza
 def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -251,7 +245,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
         if tabela_existe:
             # Montar a consulta para obter os dados da tabela da empresa no intervalo de tempo especificado
             consulta_dados_empresa = f"""
-                SELECT AVG(plastico), AVG(vidro), AVG(papel_e_papelao), AVG(aluminio), AVG(outros_metais), AVG(embalagem_longa_vida)
+                SELECT AVG(plastico), AVG(vidro), AVG(papel_e_papelao), AVG(aluminio), AVG(outros_metais), AVG(embalagem_longa_vida), SUM(volume)
                 FROM "Dados de coleta".{empresa}
                 WHERE data >= %s AND data <= %s;
             """
@@ -270,11 +264,20 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
                 "Embalagem Longa Vida"
             ]
 
-            valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa) if valor is not None and valor != 0]
+            valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa[:-1]) if valor is not None and valor != 0]
+
+            total_volume = dados_empresa[-1]  # Total volume coletado
+            soma_materiais = sum(valor for _, valor in valores_validos)  # Soma dos materiais recicláveis
+            nao_reciclado = total_volume - soma_materiais  # Calcular o volume não reciclado
 
             if valores_validos:
                 rotulos_validos, valores = zip(*valores_validos)
                 
+                # Adicionar o setor "Não reciclado" se houver volume não reciclado
+                if nao_reciclado > 0:
+                    rotulos_validos += ("Não reciclado",)
+                    valores += (nao_reciclado,)
+
                 # Criar o gráfico de pizza
                 plt.figure(figsize=(8, 8))
                 plt.pie(valores, labels=rotulos_validos, autopct='%1.1f%%')
