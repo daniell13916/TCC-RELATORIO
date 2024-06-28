@@ -393,7 +393,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
         if tabela_existe:
             # Montar a consulta para obter os dados da tabela da empresa no intervalo de tempo especificado
             consulta_dados_empresa = f"""
-                SELECT SUM(plastico), SUM(vidro), SUM(papel_e_papelao), SUM(aluminio), SUM(outros_metais), SUM(embalagem_longa_vida), SUM(volume)
+                SELECT AVG(plastico), AVG(vidro), AVG(papel_e_papelao), AVG(aluminio), AVG(outros_metais), AVG(embalagem_longa_vida)
                 FROM "Dados de coleta".{empresa}
                 WHERE data >= %s AND data <= %s;
             """
@@ -406,46 +406,27 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
             cur.close()
             conn.close()
 
-            if dados_empresa:
-                (total_plastico, total_vidro, total_papel_papelao, total_aluminio, total_outros_metais, total_embalagem_longa_vida, total_volume_coletado) = dados_empresa
+            # Filtrar os valores válidos (diferentes de zero e não None)
+            rotulos = [
+                "Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais",
+                "Embalagem Longa Vida"
+            ]
 
-                if total_volume_coletado is None or total_volume_coletado == 0:
-                    st.warning("O total de volume coletado é zero ou não disponível.")
-                    return
+            valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa) if valor is not None and valor != 0]
 
-                # Calcular as proporções de cada tipo de resíduo
-                proporcao_plastico = (total_plastico / total_volume_coletado) * 100 if total_plastico is not None else 0
-                proporcao_vidro = (total_vidro / total_volume_coletado) * 100 if total_vidro is not None else 0
-                proporcao_papel_papelao = (total_papel_papelao / total_volume_coletado) * 100 if total_papel_papelao is not None else 0
-                proporcao_aluminio = (total_aluminio / total_volume_coletado) * 100 if total_aluminio is not None else 0
-                proporcao_outros_metais = (total_outros_metais / total_volume_coletado) * 100 if total_outros_metais is not None else 0
-                proporcao_embalagem_longa_vida = (total_embalagem_longa_vida / total_volume_coletado) * 100 if total_embalagem_longa_vida is not None else 0
+            if valores_validos:
+                rotulos_validos, valores = zip(*valores_validos)
+                
+                # Criar o gráfico de pizza
+                plt.figure(figsize=(8, 8))
+                plt.pie(valores, labels=rotulos_validos, autopct='%1.1f%%')
+                plt.axis('equal')  # Aspecto igual garante que o gráfico seja desenhado como um círculo.
 
-                # Filtrar os valores válidos (diferentes de zero e não None)
-                rotulos = [
-                    "Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais", "Embalagem Longa Vida"
-                ]
-
-                proporcoes = [
-                    proporcao_plastico, proporcao_vidro, proporcao_papel_papelao, proporcao_aluminio, proporcao_outros_metais, proporcao_embalagem_longa_vida
-                ]
-
-                valores_validos = [(rotulo, proporcao) for rotulo, proporcao in zip(rotulos, proporcoes) if proporcao > 0]
-
-                if valores_validos:
-                    rotulos_validos, valores = zip(*valores_validos)
-                    
-                    # Criar o gráfico de pizza
-                    plt.figure(figsize=(8, 8))
-                    plt.pie(valores, labels=rotulos_validos, autopct='%1.1f%%')
-                    plt.axis('equal')  # Aspecto igual garante que o gráfico seja desenhado como um círculo.
-
-                    # Exibir o gráfico
-                    st.pyplot(plt)
-                else:
-                    st.warning("Não há dados válidos para exibir no gráfico.")
+                # Exibir o gráfico
+                st.pyplot(plt)
             else:
-                st.warning("Nenhum dado foi encontrado para o intervalo de tempo especificado.")
+                st.warning("Não há dados válidos para exibir no gráfico.")
+
         else:
             st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
 
