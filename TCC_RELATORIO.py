@@ -207,9 +207,12 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
 
-# Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
-# e criar um gráfico de pizza com base nesses valores
+import streamlit as st
+import psycopg2
+import matplotlib.pyplot as plt
+import time
 
+# Função para buscar proporções e criar gráfico de pizza
 def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -286,7 +289,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
             st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
 
     except psycopg2.Error as e:
-        st.error(f"Erro ao conectar")
+        st.error(f"Erro ao conectar ao banco de dados: {e}")
 
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
@@ -354,6 +357,78 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
+
+def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, aluminio, volume_destinado_corretamente):
+    # Calcular peso de cada tipo de resíduo
+    peso_papel_papelao = float(papel_papelao) if papel_papelao is not None else 0
+    peso_vidro = float(vidro) if vidro is not None else 0
+    peso_plastico = float(plastico) if plastico is not None else 0
+    peso_embalagem_longa_vida = float(embalagem_longa_vida) if embalagem_longa_vida is not None else 0
+    peso_outros_metais = float(outros_metais) if outros_metais is not None else 0
+    peso_aluminio = float(aluminio) if aluminio is not None else 0
+
+    # Proporções fornecidas pelo Cataki
+    proporcoes = {
+        "papel_papelao": {"energia": 2.5, "agua": 48, "co2": 3.47, "volume_aterrro": 1.74, "arvores": 0.02, "petroleo": 0.4},
+        "vidro": {"energia": 0.64, "agua": 0.5, "co2": 0.28, "volume_aterrro": 1.2, "arvores": 0, "petroleo": 0},
+        "plastico": {"energia": 5.3, "agua": 0.45, "co2": 1.21, "volume_aterrro": 3.14, "arvores": 0, "petroleo": 1},
+        "embalagem_longa_vida": {"energia": 5.55, "agua": 34.65, "co2": 2.96, "volume_aterrro": 2.34, "arvores": 0.014, "petroleo": 0.53},
+        "outros_metais": {"energia": 6.56, "agua": 5.36, "co2": 1.93, "volume_aterrro": 1.98, "arvores": 0, "petroleo": 0},
+        "aluminio": {"energia": 48.46, "agua": 18.69, "co2": 4.62, "volume_aterrro": 6.74, "arvores": 0, "petroleo": 0}
+    }
+
+    # Inicializar economias como zero
+    economia_energia = 0
+    economia_agua = 0
+    economia_co2 = 0
+    economia_volume_aterrro = 0
+    economia_arvores = 0
+    economia_petroleo = 0
+
+    # Calcular economias com base nas proporções
+    economia_energia += peso_papel_papelao * proporcoes["papel_papelao"]["energia"]
+    economia_energia += peso_vidro * proporcoes["vidro"]["energia"]
+    economia_energia += peso_plastico * proporcoes["plastico"]["energia"]
+    economia_energia += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["energia"]
+    economia_energia += peso_outros_metais * proporcoes["outros_metais"]["energia"]
+    economia_energia += peso_aluminio * proporcoes["aluminio"]["energia"]
+
+    economia_agua += peso_papel_papelao * proporcoes["papel_papelao"]["agua"]
+    economia_agua += peso_vidro * proporcoes["vidro"]["agua"]
+    economia_agua += peso_plastico * proporcoes["plastico"]["agua"]
+    economia_agua += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["agua"]
+    economia_agua += peso_outros_metais * proporcoes["outros_metais"]["agua"]
+    economia_agua += peso_aluminio * proporcoes["aluminio"]["agua"]
+
+    economia_co2 += peso_papel_papelao * proporcoes["papel_papelao"]["co2"]
+    economia_co2 += peso_vidro * proporcoes["vidro"]["co2"]
+    economia_co2 += peso_plastico * proporcoes["plastico"]["co2"]
+    economia_co2 += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["co2"]
+    economia_co2 += peso_outros_metais * proporcoes["outros_metais"]["co2"]
+    economia_co2 += peso_aluminio * proporcoes["aluminio"]["co2"]
+
+    economia_volume_aterrro += peso_papel_papelao * proporcoes["papel_papelao"]["volume_aterrro"]
+    economia_volume_aterrro += peso_vidro * proporcoes["vidro"]["volume_aterrro"]
+    economia_volume_aterrro += peso_plastico * proporcoes["plastico"]["volume_aterrro"]
+    economia_volume_aterrro += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["volume_aterrro"]
+    economia_volume_aterrro += peso_outros_metais * proporcoes["outros_metais"]["volume_aterrro"]
+    economia_volume_aterrro += peso_aluminio * proporcoes["aluminio"]["volume_aterrro"]
+
+    economia_arvores += peso_papel_papelao * proporcoes["papel_papelao"]["arvores"]
+    economia_arvores += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["arvores"]
+
+    economia_petroleo += peso_papel_papelao * proporcoes["papel_papelao"]["petroleo"]
+    economia_petroleo += peso_plastico * proporcoes["plastico"]["petroleo"]
+    economia_petroleo += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["petroleo"]
+
+    return {
+        "Economia de Energia (kWh)": round(economia_energia, 2),
+        "Economia de Água (litros)": round(economia_agua, 2),
+        "Redução de CO2 (kg)": round(economia_co2, 2),
+        "Redução de Volume no Aterro (litros)": round(economia_volume_aterrro, 2),
+        "Economia de Árvores (%)": round(economia_arvores, 2),
+        "Economia de Petróleo (litros)": round(economia_petroleo, 2)
+    }
 
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
@@ -484,6 +559,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
         st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
+
 
 
 # Função para exibir o formulário de coleta
