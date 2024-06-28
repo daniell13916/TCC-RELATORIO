@@ -368,6 +368,9 @@ def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, out
     st.write(peso_aluminio)
     st.write(peso_plastico)
     st.write(peso_vidro)
+    st.write(peso_papel_papelao)
+    st.write(peso_embalagem_longa_vida)
+    st.write(peso_outros_metais)
     
     # Proporções fornecidas pelo Cataki
     proporcoes = {
