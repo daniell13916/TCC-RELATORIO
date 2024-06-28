@@ -357,21 +357,6 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def solicitar_proporcoes(senha_empresa, data_inicio, data_fim):
-    proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)  # Chama a função para obter as proporções com intervalo de tempo
-    if proporcoes:
-        proporcao_plastico = proporcoes[3] if proporcoes[3] is not None else 0
-        proporcao_vidro = proporcoes[2] if proporcoes[2] is not None else 0
-        proporcao_papel_papelao = proporcoes[1] if proporcoes[1] is not None else 0
-        proporcao_embalagem_longa_vida = proporcoes[4] if proporcoes[4] is not None else 0
-        proporcao_outros_metais = proporcoes[5] if proporcoes[5] is not None else 0
-        proporcao_aluminio = proporcoes[0] if proporcoes[0] is not None else 0
-        
-        return proporcao_plastico, proporcao_vidro, proporcao_papel_papelao, proporcao_embalagem_longa_vida, proporcao_outros_metais, proporcao_aluminio
-    else:
-        st.error("Não foi possível obter as proporções do usuário.")
-        return None
-
 def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, aluminio, volume_destinado_corretamente):
     # Calcular peso de cada tipo de resíduo
     peso_papel_papelao = float(papel_papelao) if papel_papelao is not None else 0
@@ -383,12 +368,7 @@ def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, out
     st.write(peso_aluminio)
     st.write(peso_plastico)
     st.write(peso_vidro)
-    st.write(proporcao_embalagem_longa_vida)
-    st.write(proporcao_outros_metais)
-    st.write(proporcao_aluminio)
     
-    
-
     # Proporções fornecidas pelo Cataki
     proporcoes = {
         "papel_papelao": {"energia": 2.5, "agua": 48, "co2": 3.47, "volume_aterrro": 1.74, "arvores": 0.02, "petroleo": 0.4},
