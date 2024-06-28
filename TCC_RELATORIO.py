@@ -355,7 +355,7 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim,total_volume_coletado):
+def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
@@ -393,7 +393,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim,total_volume_col
         if tabela_existe:
             # Montar a consulta para obter os dados da tabela da empresa no intervalo de tempo especificado
             consulta_dados_empresa = f"""
-                SELECT SUM(plastico), SUM(vidro), SUM(papel_e_papelao), SUM(aluminio), SUM(outros_metais), SUM(embalagem_longa_vida), SUM(total_volume_coletado)
+                SELECT SUM(plastico), SUM(vidro), SUM(papel_e_papelao), SUM(aluminio), SUM(outros_metais), SUM(embalagem_longa_vida), SUM(volume)
                 FROM "Dados de coleta".{empresa}
                 WHERE data >= %s AND data <= %s;
             """
