@@ -207,6 +207,73 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
 
+def buscar_valores_proporcoes(senha, data_inicio, data_fim):
+    try:
+        # Conectar ao banco de dados PostgreSQL
+        conn = psycopg2.connect(
+            host="seulixo-aws.c7my4s6c6mqm.us-east-1.rds.amazonaws.com",
+            database="postgres",
+            user="postgres",
+            password="#SEUlixo321"
+        )
+
+        # Criar um cursor para executar consultas
+        cur = conn.cursor()
+
+        # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
+        cur.execute("""
+            SELECT empresa
+            FROM users
+            WHERE password = %s;
+        """, (senha,))
+        
+        # Obter o nome da empresa
+        empresa = cur.fetchone()[0]
+
+        # Verificar se a tabela da empresa existe no esquema "Dados de coleta"
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'Dados de coleta'
+                AND table_name = %s
+            );
+        """, (empresa,))
+        
+        tabela_existe = cur.fetchone()[0]
+
+        if tabela_existe:
+            # Montar a consulta para obter a soma dos dados da tabela da empresa no intervalo de tempo especificado
+            consulta_proporcoes_empresa = f"""
+                SELECT 
+                    SUM(aluminio), 
+                    SUM(papel_e_papelao), 
+                    SUM(vidro), 
+                    SUM(plastico), 
+                    SUM(embalagem_longa_vida), 
+                    SUM(outros_metais)
+                FROM "Dados de coleta".{empresa}
+                WHERE data >= %s AND data <= %s;
+            """
+            
+            # Executar a consulta para obter os dados da tabela da empresa
+            cur.execute(consulta_proporcoes_empresa, (data_inicio, data_fim))
+            proporcoes = cur.fetchone()
+
+            # Fechar o cursor e a conexão com o banco de dados
+            cur.close()
+            conn.close()
+
+            return proporcoes
+
+        else:
+            st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
+            return None
+
+    except psycopg2.Error as e:
+        st.error(f"Erro ao conectar ao banco de dados: {e}")
+        return None
+
 # Função para conectar ao banco de dados PostgreSQL, buscar os valores das colunas para uma linha específica
 # e criar um gráfico de pizza com base nesses valores
 
@@ -287,74 +354,6 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
 
     except psycopg2.Error as e:
         st.error(f"Erro ao conect
-
-def buscar_valores_proporcoes(senha, data_inicio, data_fim):
-    try:
-        # Conectar ao banco de dados PostgreSQL
-        conn = psycopg2.connect(
-            host="seulixo-aws.c7my4s6c6mqm.us-east-1.rds.amazonaws.com",
-            database="postgres",
-            user="postgres",
-            password="#SEUlixo321"
-        )
-
-        # Criar um cursor para executar consultas
-        cur = conn.cursor()
-
-        # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
-        cur.execute("""
-            SELECT empresa
-            FROM users
-            WHERE password = %s;
-        """, (senha,))
-        
-        # Obter o nome da empresa
-        empresa = cur.fetchone()[0]
-
-        # Verificar se a tabela da empresa existe no esquema "Dados de coleta"
-        cur.execute("""
-            SELECT EXISTS (
-                SELECT 1
-                FROM information_schema.tables
-                WHERE table_schema = 'Dados de coleta'
-                AND table_name = %s
-            );
-        """, (empresa,))
-        
-        tabela_existe = cur.fetchone()[0]
-
-        if tabela_existe:
-            # Montar a consulta para obter a soma dos dados da tabela da empresa no intervalo de tempo especificado
-            consulta_proporcoes_empresa = f"""
-                SELECT 
-                    SUM(aluminio), 
-                    SUM(papel_e_papelao), 
-                    SUM(vidro), 
-                    SUM(plastico), 
-                    SUM(embalagem_longa_vida), 
-                    SUM(outros_metais)
-                FROM "Dados de coleta".{empresa}
-                WHERE data >= %s AND data <= %s;
-            """
-            
-            # Executar a consulta para obter os dados da tabela da empresa
-            cur.execute(consulta_proporcoes_empresa, (data_inicio, data_fim))
-            proporcoes = cur.fetchone()
-
-            # Fechar o cursor e a conexão com o banco de dados
-            cur.close()
-            conn.close()
-
-            return proporcoes
-
-        else:
-            st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
-            return None
-
-    except psycopg2.Error as e:
-        st.error(f"Erro ao conectar ao banco de dados: {e}")
-        return None
-
         
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
