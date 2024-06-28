@@ -288,8 +288,6 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
 
-import psycopg2
-
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -357,91 +355,103 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, volume_destinado_corretamente):
-    # Calcular peso de cada tipo de resíduo
-    peso_aluminio = float(aluminio) if aluminio is not None else 0
-    peso_papel_papelao = float(papel_papelao) if papel_papelao is not None else 0
-    peso_vidro = float(vidro) if vidro is not None else 0
-    peso_plastico = float(plastico) if plastico is not None else 0
-    peso_embalagem_longa_vida = float(embalagem_longa_vida) if embalagem_longa_vida is not None else 0
-    peso_outros_metais = float(outros_metais) if outros_metais is not None else 0
+def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
+    try:
+        # Conectar ao banco de dados PostgreSQL
+        conn = psycopg2.connect(
+            host="seulixo-aws.c7my4s6c6mqm.us-east-1.rds.amazonaws.com",
+            database="postgres",
+            user="postgres",
+            password="#SEUlixo321"
+        )
 
-    # Proporções fornecidas pelo Cataki
-    proporcoes = {
-        "papel_papelao": {"energia": 2.5, "agua": 48, "co2": 3.47, "volume_aterrro": 1.74, "arvores": 0.02, "petroleo": 0.4},
-        "vidro": {"energia": 0.64, "agua": 0.5, "co2": 0.28, "volume_aterrro": 1.2, "arvores": 0, "petroleo": 0},
-        "plastico": {"energia": 5.3, "agua": 0.45, "co2": 1.21, "volume_aterrro": 3.14, "arvores": 0, "petroleo": 1},
-        "embalagem_longa_vida": {"energia": 5.55, "agua": 34.65, "co2": 2.96, "volume_aterrro": 2.34, "arvores": 0.014, "petroleo": 0.53},
-        "outros_metais": {"energia": 6.56, "agua": 5.36, "co2": 1.93, "volume_aterrro": 1.98, "arvores": 0, "petroleo": 0},
-        "aluminio": {"energia": 48.46, "agua": 18.69, "co2": 4.62, "volume_aterrro": 6.74, "arvores": 0, "petroleo": 0}
-    }
+        # Criar um cursor para executar consultas
+        cur = conn.cursor()
 
-    # Inicializar economias como zero
-    economia_energia = 0
-    economia_agua = 0
-    economia_co2 = 0
-    economia_volume_aterrro = 0
-    economia_arvores = 0
-    economia_petroleo = 0
+        # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
+        cur.execute("""
+            SELECT empresa
+            FROM users
+            WHERE password = %s;
+        """, (senha,))
+        
+        # Obter o nome da empresa
+        empresa = cur.fetchone()[0]
 
-    # Calcular economias com base nas proporções
-    economia_energia += peso_papel_papelao * proporcoes["papel_papelao"]["energia"]
-    st.write(economia_energia)
-    economia_energia += peso_vidro * proporcoes["vidro"]["energia"]
-    st.write(economia_energia)
-    economia_energia += peso_plastico * proporcoes["plastico"]["energia"]
-    st.write(economia_energia)
-    economia_energia += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["energia"]
-    st.write(economia_energia)
-    economia_energia += peso_outros_metais * proporcoes["outros_metais"]["energia"]
-    st.write(economia_energia)
-    economia_energia += peso_aluminio * proporcoes["aluminio"]["energia"]
-    st.write(economia_energia)
+        # Verificar se a tabela da empresa existe no esquema "Dados de coleta"
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'Dados de coleta'
+                AND table_name = %s
+            );
+        """, (empresa,))
+        
+        tabela_existe = cur.fetchone()[0]
 
-    economia_agua += peso_papel_papelao * proporcoes["papel_papelao"]["agua"]
-    economia_agua += peso_vidro * proporcoes["vidro"]["agua"]
-    economia_agua += peso_plastico * proporcoes["plastico"]["agua"]
-    economia_agua += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["agua"]
-    economia_agua += peso_outros_metais * proporcoes["outros_metais"]["agua"]
-    economia_agua += peso_aluminio * proporcoes["aluminio"]["agua"]
+        if tabela_existe:
+            # Montar a consulta para obter os dados da tabela da empresa no intervalo de tempo especificado
+            consulta_dados_empresa = f"""
+                SELECT SUM(plastico), SUM(vidro), SUM(papel_e_papelao), SUM(aluminio), SUM(outros_metais), SUM(embalagem_longa_vida), SUM(total_volume_coletado)
+                FROM "Dados de coleta".{empresa}
+                WHERE data >= %s AND data <= %s;
+            """
+            
+            # Executar a consulta para obter os dados da tabela da empresa
+            cur.execute(consulta_dados_empresa, (data_inicio, data_fim))
+            dados_empresa = cur.fetchone()
 
-    economia_co2 += peso_papel_papelao * proporcoes["papel_papelao"]["co2"]
-    economia_co2 += peso_vidro * proporcoes["vidro"]["co2"]
-    economia_co2 += peso_plastico * proporcoes["plastico"]["co2"]
-    economia_co2 += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["co2"]
-    economia_co2 += peso_outros_metais * proporcoes["outros_metais"]["co2"]
-    economia_co2 += peso_aluminio * proporcoes["aluminio"]["co2"]
+            # Fechar o cursor e a conexão com o banco de dados
+            cur.close()
+            conn.close()
 
-    economia_volume_aterrro += peso_papel_papelao * proporcoes["papel_papelao"]["volume_aterrro"]
-    economia_volume_aterrro += peso_vidro * proporcoes["vidro"]["volume_aterrro"]
-    economia_volume_aterrro += peso_plastico * proporcoes["plastico"]["volume_aterrro"]
-    economia_volume_aterrro += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["volume_aterrro"]
-    economia_volume_aterrro += peso_outros_metais * proporcoes["outros_metais"]["volume_aterrro"]
-    economia_volume_aterrro += peso_aluminio * proporcoes["aluminio"]["volume_aterrro"]
+            if dados_empresa:
+                (total_plastico, total_vidro, total_papel_papelao, total_aluminio, total_outros_metais, total_embalagem_longa_vida, total_volume_coletado) = dados_empresa
 
-    economia_arvores += peso_papel_papelao * proporcoes["papel_papelao"]["arvores"]
-    economia_arvores += peso_vidro * proporcoes["vidro"]["arvores"]
-    economia_arvores += peso_plastico * proporcoes["plastico"]["arvores"]
-    economia_arvores += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["arvores"]
-    economia_arvores += peso_outros_metais * proporcoes["outros_metais"]["arvores"]
-    economia_arvores += peso_aluminio * proporcoes["aluminio"]["arvores"]
+                if total_volume_coletado is None or total_volume_coletado == 0:
+                    st.warning("O total de volume coletado é zero ou não disponível.")
+                    return
 
-    economia_petroleo += peso_papel_papelao * proporcoes["papel_papelao"]["petroleo"]
-    economia_petroleo += peso_vidro * proporcoes["vidro"]["petroleo"]
-    economia_petroleo += peso_plastico * proporcoes["plastico"]["petroleo"]
-    economia_petroleo += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["petroleo"]
-    economia_petroleo += peso_outros_metais * proporcoes["outros_metais"]["petroleo"]
-    economia_petroleo += peso_aluminio * proporcoes["aluminio"]["petroleo"]
+                # Calcular as proporções de cada tipo de resíduo
+                proporcao_plastico = (total_plastico / total_volume_coletado) * 100 if total_plastico is not None else 0
+                proporcao_vidro = (total_vidro / total_volume_coletado) * 100 if total_vidro is not None else 0
+                proporcao_papel_papelao = (total_papel_papelao / total_volume_coletado) * 100 if total_papel_papelao is not None else 0
+                proporcao_aluminio = (total_aluminio / total_volume_coletado) * 100 if total_aluminio is not None else 0
+                proporcao_outros_metais = (total_outros_metais / total_volume_coletado) * 100 if total_outros_metais is not None else 0
+                proporcao_embalagem_longa_vida = (total_embalagem_longa_vida / total_volume_coletado) * 100 if total_embalagem_longa_vida is not None else 0
 
-    return {
-        "Economia de Energia (kWh)": format(round(economia_energia, 2), '.2f'),
-        "Economia de Água (litros)": format(round(economia_agua, 2), '.2f'),
-        "Redução de CO2 (kg)": format(round(economia_co2, 2), '.2f'),
-        "Redução de Volume no Aterro (litros)": format(round(economia_volume_aterrro, 2), '.2f'),
-        "Economia de Árvores (%)": format(round(economia_arvores, 2), '.2f'),
-        "Economia de Petróleo (litros)": format(round(economia_petroleo, 2), '.2f')
-    }
+                # Filtrar os valores válidos (diferentes de zero e não None)
+                rotulos = [
+                    "Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais", "Embalagem Longa Vida"
+                ]
 
+                proporcoes = [
+                    proporcao_plastico, proporcao_vidro, proporcao_papel_papelao, proporcao_aluminio, proporcao_outros_metais, proporcao_embalagem_longa_vida
+                ]
+
+                valores_validos = [(rotulo, proporcao) for rotulo, proporcao in zip(rotulos, proporcoes) if proporcao > 0]
+
+                if valores_validos:
+                    rotulos_validos, valores = zip(*valores_validos)
+                    
+                    # Criar o gráfico de pizza
+                    plt.figure(figsize=(8, 8))
+                    plt.pie(valores, labels=rotulos_validos, autopct='%1.1f%%')
+                    plt.axis('equal')  # Aspecto igual garante que o gráfico seja desenhado como um círculo.
+
+                    # Exibir o gráfico
+                    st.pyplot(plt)
+                else:
+                    st.warning("Não há dados válidos para exibir no gráfico.")
+            else:
+                st.warning("Nenhum dado foi encontrado para o intervalo de tempo especificado.")
+        else:
+            st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
+
+    except psycopg2.Error as e:
+        st.error(f"Erro ao conectar ao banco de dados: {e}")
+        
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
