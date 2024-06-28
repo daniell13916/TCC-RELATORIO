@@ -445,6 +445,12 @@ def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, out
     economia_petroleo += peso_outros_metais * proporcoes["outros_metais"]["petroleo"]
     economia_petroleo += peso_aluminio * proporcoes["aluminio"]["petroleo"]
 
+    st.write(economia_energia)
+    st.write(economia_agua)
+    st.write(economia_co2) 
+    st.write(economia_volume_aterrro)
+    st.write(economia_petroleo) 
+
     return {
         "Economia de Energia (kWh)": format(round(economia_energia, 2), '.2f'),
         "Economia de Água (litros)": format(round(economia_agua, 2), '.2f'),
