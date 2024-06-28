@@ -270,6 +270,11 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
             soma_materiais = sum(valor for _, valor in valores_validos)  # Soma dos materiais recicláveis
             nao_reciclado = total_volume - soma_materiais  # Calcular o volume não reciclado
 
+            # Mostrar os valores para depuração
+            st.write("Total volume coletado:", total_volume)
+            st.write("Valores dos materiais recicláveis:", valores_validos)
+            st.write("Volume não reciclado:", nao_reciclado)
+
             if valores_validos:
                 rotulos_validos, valores = zip(*valores_validos)
                 
@@ -293,6 +298,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
 
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
+
 
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
