@@ -380,9 +380,9 @@ def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, out
     peso_embalagem_longa_vida = float(embalagem_longa_vida) if embalagem_longa_vida is not None else 0
     peso_outros_metais = float(outros_metais) if outros_metais is not None else 0
     peso_aluminio = float(aluminio) if aluminio is not None else 0
-    st.write(proporcao_plastico)
-    st.write(proporcao_vidro)
-    st.write(proporcao_papel_papelao)
+    st.write(peso_aluminio)
+    st.write(peso_plastico)
+    st.write(peso_vidro)
     st.write(proporcao_embalagem_longa_vida)
     st.write(proporcao_outros_metais)
     st.write(proporcao_aluminio)
