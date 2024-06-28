@@ -365,13 +365,7 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
     peso_plastico = float(plastico) if plastico is not None else 0
     peso_embalagem_longa_vida = float(embalagem_longa_vida) if embalagem_longa_vida is not None else 0
     peso_outros_metais = float(outros_metais) if outros_metais is not None else 0
-    st.write(peso_aluminio)
-    st.write(peso_plastico)
-    st.write(peso_vidro)
-    st.write(peso_papel_papelao)
-    st.write(peso_embalagem_longa_vida)
-    st.write(peso_outros_metais)
-    
+
     # Proporções fornecidas pelo Cataki
     proporcoes = {
         "papel_papelao": {"energia": 2.5, "agua": 48, "co2": 3.47, "volume_aterrro": 1.74, "arvores": 0.02, "petroleo": 0.4},
