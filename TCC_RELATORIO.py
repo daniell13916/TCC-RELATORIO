@@ -286,7 +286,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
             st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
 
     except psycopg2.Error as e:
-        st.error(f"Erro ao conectar ao banco de dados: {e}")
+        st.error(f"Erro ao conect
 
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
