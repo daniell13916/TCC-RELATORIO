@@ -355,7 +355,7 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
+def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim,total_volume_coletado):
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
