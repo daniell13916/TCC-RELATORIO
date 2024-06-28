@@ -357,14 +357,14 @@ def buscar_valores_proporcoes(senha, data_inicio, data_fim):
         st.error(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, aluminio, volume_destinado_corretamente):
+def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_longa_vida, outros_metais, volume_destinado_corretamente):
     # Calcular peso de cada tipo de resíduo
+    peso_aluminio = float(aluminio) if aluminio is not None else 0
     peso_papel_papelao = float(papel_papelao) if papel_papelao is not None else 0
     peso_vidro = float(vidro) if vidro is not None else 0
     peso_plastico = float(plastico) if plastico is not None else 0
     peso_embalagem_longa_vida = float(embalagem_longa_vida) if embalagem_longa_vida is not None else 0
     peso_outros_metais = float(outros_metais) if outros_metais is not None else 0
-    peso_aluminio = float(aluminio) if aluminio is not None else 0
     st.write(peso_aluminio)
     st.write(peso_plastico)
     st.write(peso_vidro)
