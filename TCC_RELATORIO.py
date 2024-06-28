@@ -390,6 +390,12 @@ def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, out
         "outros_metais": {"energia": 6.56, "agua": 5.36, "co2": 1.93, "volume_aterrro": 1.98, "arvores": 0, "petroleo": 0},
         "aluminio": {"energia": 48.46, "agua": 18.69, "co2": 4.62, "volume_aterrro": 6.74, "arvores": 0, "petroleo": 0}
     }
+    st.write( proporcoes["papel_papelao"]["energia"])
+    st.write(proporcoes["vidro"]["energia"])
+    st.write(["plastico"]["energia"])
+    st.write(["embalagem_longa_vida"]["energia"])
+    st.write(["outros_metais"]["energia"])
+    st.write(["aluminio"]["energia"])
 
     # Inicializar economias como zero
     economia_energia = 0
