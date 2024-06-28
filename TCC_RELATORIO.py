@@ -389,11 +389,17 @@ def calcular_economias(papel_papelao, vidro, plastico, embalagem_longa_vida, out
 
     # Calcular economias com base nas proporções
     economia_energia += peso_papel_papelao * proporcoes["papel_papelao"]["energia"]
+    st.write(economia_energia)
     economia_energia += peso_vidro * proporcoes["vidro"]["energia"]
+    st.write(economia_energia)
     economia_energia += peso_plastico * proporcoes["plastico"]["energia"]
+    st.write(economia_energia)
     economia_energia += peso_embalagem_longa_vida * proporcoes["embalagem_longa_vida"]["energia"]
+    st.write(economia_energia)
     economia_energia += peso_outros_metais * proporcoes["outros_metais"]["energia"]
+    st.write(economia_energia)
     economia_energia += peso_aluminio * proporcoes["aluminio"]["energia"]
+    st.write(economia_energia)
 
     economia_agua += peso_papel_papelao * proporcoes["papel_papelao"]["agua"]
     economia_agua += peso_vidro * proporcoes["vidro"]["agua"]
