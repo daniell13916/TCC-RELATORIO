@@ -514,8 +514,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     else:
         st.error("Não há dados de coleta para o período especificado.")
 
-except psycopg2.Error as e:
-    st.error(f"Erro ao conectar no banco de dados: {e}")
         
 # Função para exibir o formulário de coleta
 def collection_form():
