@@ -457,101 +457,105 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                     WHERE password = %s;
                 """, (senha_empresa,))
                 porcentagem_rejeitos = cur.fetchone()
+    
+                if porcentagem_rejeitos is not None:
+                    porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
 
     
-                if dados_empresa:
-                    volume_total = dados_empresa[0]
-                    nao_reciclado = dados_empresa[7]
-                    volume_destinado_corretamente = volume_total - nao_reciclado
-                    total_coletas = len(dados_empresa)
-
-                    # Formatação da data do relatório
-                    data_relatorio = time.strftime("%d de %B de %Y")
-                    
-                    # Formatação das datas de início e fim
-                    data_inicio_formatada = data_inicio.strftime("%d/%m/%Y")
-                    data_fim_formatada = data_fim.strftime("%d/%m/%Y")
-                    
-                    # Escrita do relatório
-                    st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
-                    st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
-                    st.write(f"Uberlândia, {data_relatorio}")
-                    st.write(f"No período entre {data_inicio_formatada} a {data_fim_formatada} foram feitas {total_coletas} coletas, totalizando cerca de {round(volume_total, 2)} kg coletados.")
-                    st.write(f"Foi considerada uma perda de {round(nao_reciclado, 2)} kg de rejeito ou materiais não recicláveis nos recipientes de coleta.")
-                    st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_destinado_corretamente, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
-
-                    st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
-                    st.write("Porcentagem de cada tipo de material em relação ao peso total")
-
-                    # Chamar a função para buscar os valores das colunas e criar o gráfico
-                     # Buscar valores para criar gráfico e obter dados necessários
-                    st.write(" ")
-                    dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
-
-                    # Calcular economias com base nas proporções
-                    proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
-                    if proporcoes:
-                        resultado = calcular_economias(*proporcoes, volume_destinado_corretamente)
-
-                        # Exibir resultados das economias
-                        st.markdown("<h2 style='color: #38b6ff;'>Ganhos Ambientais</h2>", unsafe_allow_html=True)
-                        st.write("Dados dos ganhos ambientais na preservação do meio ambiente alcançados com a destinação correta dos resíduos recicláveis e orgânicos.")
-
-                        # Dividindo os resultados em uma matriz 3x2
-                        num_rows = 3
-                        num_cols = 2
-                        resultados = list(resultado.items())
-
-                        # Dicionário de emojis correspondentes aos diferentes tipos de economias
-                        emojis = {
-                            "Economia de Energia (kWh)": "💡",
-                            "Economia de Água (litros)": "💧",
-                            "Redução de CO2 (kg)": "🌍",
-                            "Redução de Volume no Aterro (litros)": "♻️",
-                            "Economia de Árvores (%)": "🌳",
-                            "Economia de Petróleo (litros)": "⛽"
-                        }
-
-                        for i in range(num_rows):
-                            for j in range(num_cols):
-                                index = i * num_cols + j
-                                if index < len(resultados):
-                                    chave, valor = resultados[index]
-                                    # Adicionar emoji correspondente à economia
-                                    emoji = emojis.get(chave, "")
-                                    # Criar a moldura com o emoji e o valor
-                                    st.markdown(f"<div style='border: 1px solid black; padding: 20px; text-align: center; color: #38b6ff;'>{emoji} {chave}: {valor}</div>", unsafe_allow_html=True)
-                                else:
-                                    # Criar uma moldura vazia
-                                    st.markdown("<div style='border: 1px solid black; padding: 20px;'></div>", unsafe_allow_html=True)
-
-                        # Colorindo os títulos em azul
-                        st.markdown(
-                            """
-                            <style>
-                            .title-text {
-                                color: #38b6ff;
+                    if dados_empresa:
+                        volume_total = dados_empresa[0]
+                        nao_reciclado = dados_empresa[7]
+                        volume_destinado_corretamente = volume_total - nao_reciclado
+                        total_coletas = len(dados_empresa)
+    
+                        # Formatação da data do relatório
+                        data_relatorio = time.strftime("%d de %B de %Y")
+                        
+                        # Formatação das datas de início e fim
+                        data_inicio_formatada = data_inicio.strftime("%d/%m/%Y")
+                        data_fim_formatada = data_fim.strftime("%d/%m/%Y")
+                        
+                        # Escrita do relatório
+                        st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
+                        st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
+                        st.write(f"Uberlândia, {data_relatorio}")
+                        st.write(f"No período entre {data_inicio_formatada} a {data_fim_formatada} foram feitas {total_coletas} coletas, totalizando cerca de {round(volume_total, 2)} kg coletados.")
+                        st.write(f"Foi considerada uma perda de {round(nao_reciclado, 2)} kg de rejeito ou materiais não recicláveis nos recipientes de coleta.")
+                        st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_destinado_corretamente, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
+    
+                        st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
+                        st.write("Porcentagem de cada tipo de material em relação ao peso total")
+    
+                        # Chamar a função para buscar os valores das colunas e criar o gráfico
+    
+                        # Buscar valores para criar gráfico e obter dados necessários
+                        dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+    
+                        # Calcular economias com base nas proporções
+                        proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
+                        if proporcoes:
+                            resultado = calcular_economias(*proporcoes, volume_destinado_corretamente)
+    
+                            # Exibir resultados das economias
+                            st.markdown("<h2 style='color: #38b6ff;'>Ganhos Ambientais</h2>", unsafe_allow_html=True)
+                            st.write("Dados dos ganhos ambientais na preservação do meio ambiente alcançados com a destinação correta dos resíduos recicláveis e orgânicos.")
+    
+                            # Dividindo os resultados em uma matriz 3x2
+                            num_rows = 3
+                            num_cols = 2
+                            resultados = list(resultado.items())
+    
+                            # Dicionário de emojis correspondentes aos diferentes tipos de economias
+                            emojis = {
+                                "Economia de Energia (kWh)": "💡",
+                                "Economia de Água (litros)": "💧",
+                                "Redução de CO2 (kg)": "🌍",
+                                "Redução de Volume no Aterro (litros)": "♻️",
+                                "Economia de Árvores (%)": "🌳",
+                                "Economia de Petróleo (litros)": "⛽"
                             }
-                            </style>
-                            """, 
-                            unsafe_allow_html=True
-                        )
-
-                        st.write("Fonte: Cálculos desenvolvidos pelo Cataki em parceria com o Instituto GEA.")
-                        st.markdown("<h2 style='color: #38b6ff;'>Gabriela Brant</h2>", unsafe_allow_html=True)
-                        st.write("Responsável Técnica Seu Lixo LTDA")
-                        st.markdown("<h2 style='color: #38b6ff;'>Alexandre Corrêa</h2>", unsafe_allow_html=True)
-                        st.write("Diretor Seu Lixo LTDA")
-
-                else:
-                    st.error("Não há dados de coleta para o período especificado.")
-        else:
-            st.error("Senha da empresa não encontrada.")
+    
+                            for i in range(num_rows):
+                                for j in range(num_cols):
+                                    index = i * num_cols + j
+                                    if index < len(resultados):
+                                        chave, valor = resultados[index]
+                                        # Adicionar emoji correspondente à economia
+                                        emoji = emojis.get(chave, "")
+                                        # Criar a moldura com o emoji e o valor
+                                        st.markdown(f"<div style='border: 1px solid black; padding: 20px; text-align: center; color: #38b6ff;'>{emoji} {chave}: {valor}</div>", unsafe_allow_html=True)
+                                    else:
+                                        # Criar uma moldura vazia
+                                        st.markdown("<div style='border: 1px solid black; padding: 20px;'></div>", unsafe_allow_html=True)
+    
+                            # Colorindo os títulos em azul
+                            st.markdown(
+                                """
+                                <style>
+                                .title-text {
+                                    color: #38b6ff;
+                                }
+                                </style>
+                                """, 
+                                unsafe_allow_html=True
+                            )
+    
+                            st.write("Fonte: Cálculos desenvolvidos pelo Cataki em parceria com o Instituto GEA.")
+                            st.markdown("<h2 style='color: #38b6ff;'>Gabriela Brant</h2>", unsafe_allow_html=True)
+                            st.write("Responsável Técnica Seu Lixo LTDA")
+                            st.markdown("<h2 style='color: #38b6ff;'>Alexandre Corrêa</h2>", unsafe_allow_html=True)
+                            st.write("Diretor Seu Lixo LTDA")
+    
+                    else:
+                        st.error("Não há dados de coleta para o período especificado.")
+            else:
+                st.error("Senha da empresa não encontrada.")
             
     except TypeError:
         st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
+
 
 # Função para exibir o formulário de coleta
 def collection_form():
