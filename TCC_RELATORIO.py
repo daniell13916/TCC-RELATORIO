@@ -207,91 +207,56 @@ def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
     except psycopg2.Error as e:
         return f"Erro ao conectar ao banco de dados: {e}"
 
-def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
+def buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim):
     try:
-        # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
             host="seulixo-aws.c7my4s6c6mqm.us-east-1.rds.amazonaws.com",
             database="postgres",
             user="postgres",
             password="#SEUlixo321"
         )
-
-        # Criar um cursor para executar consultas
-        cur = conn.cursor()
-
-        # Consulta para obter o nome da empresa da tabela "users" com base na senha fornecida
-        cur.execute("""
-            SELECT empresa
-            FROM users
-            WHERE password = %s;
-        """, (senha,))
         
-        # Obter o nome da empresa
-        empresa = cur.fetchone()[0]
-
-        # Verificar se a tabela da empresa existe no esquema "Dados de coleta"
-        cur.execute("""
-            SELECT EXISTS (
-                SELECT 1
-                FROM information_schema.tables
-                WHERE table_schema = 'Dados de coleta'
-                AND table_name = %s
-            );
-        """, (empresa,))
-        
-        tabela_existe = cur.fetchone()[0]
-
-        if tabela_existe:
-            # Montar a consulta para obter os dados da tabela da empresa no intervalo de tempo especificado
-            consulta_dados_empresa = f"""
-                SELECT 
-                    COALESCE(SUM(volume), 0) AS volume_total,
-                    COALESCE(SUM(plastico), 0) AS plastico,
-                    COALESCE(SUM(vidro), 0) AS vidro,
-                    COALESCE(SUM(papel_e_papelao), 0) AS papel_e_papelao,
-                    COALESCE(SUM(aluminio), 0) AS aluminio,
-                    COALESCE(SUM(outros_metais), 0) AS outros_metais,
-                    COALESCE(SUM(embalagem_longa_vida), 0) AS embalagem_longa_vida,
-                    COALESCE(SUM(volume), 0) - COALESCE(SUM(plastico), 0) - COALESCE(SUM(vidro), 0) - COALESCE(SUM(papel_e_papelao), 0) - COALESCE(SUM(aluminio), 0) - COALESCE(SUM(outros_metais), 0) - COALESCE(SUM(embalagem_longa_vida), 0) AS nao_reciclado
-                FROM "Dados de coleta".{empresa}
-                WHERE data >= %s AND data <= %s;
-            """
+        with conn.cursor() as cur:
+            # Consulta para obter dados da empresa
+            cur.execute("SELECT id, empresa FROM public.users WHERE password = %s;", (senha_empresa,))
+            empresa_info = cur.fetchone()
             
-            # Executar a consulta para obter os dados da tabela da empresa
-            cur.execute(consulta_dados_empresa, (data_inicio, data_fim))
-            dados_empresa = cur.fetchone()
+            if empresa_info:
+                empresa = empresa_info[1]  # Assumindo que o segundo elemento é o nome da empresa
+                
+                # Consulta para obter dados para o gráfico
+                cur.execute("""
+                    SELECT * FROM sua_tabela
+                    WHERE data BETWEEN %s AND %s
+                    AND empresa_id = %s;
+                """, (data_inicio, data_fim, empresa_info[0]))
+                
+                dados = cur.fetchall()
+                
+                if dados:
+                    # Processar dados aqui se necessário
+                    # Por exemplo, criar um gráfico
+                    
+                    # Supondo que você retorne os dados relevantes
+                    return dados
+                else:
+                    return None  # Ou levante um erro indicando que não há dados disponíveis
+            
+            else:
+                return None  # Ou levante um erro indicando que a senha da empresa não foi encontrada
+    
+    except psycopg2.Error as e:
+        # Lidar com erros de conexão com o banco de dados
+        print(f"Erro ao conectar ao banco de dados: {e}")
+        return None  # Ou levante um erro apropriado, dependendo do caso
 
-            # Fechar o cursor e a conexão com o banco de dados
-            cur.close()
+    finally:
+        # Sempre feche a conexão com o banco de dados, mesmo se ocorrer um erro
+        if conn:
             conn.close()
 
-            # Filtrar os valores válidos (diferentes de zero e não None)
-            rotulos = [
-                "Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais",
-                "Embalagem Longa Vida", "Não Reciclado"
-            ]
+    return None  # Retorne None como um fallback
 
-            valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa[1:]) if valor is not None and valor != 0]
-
-            if valores_validos:
-                rotulos_validos, valores = zip(*valores_validos)
-                
-                # Criar o gráfico de pizza
-                plt.figure(figsize=(8, 8))
-                plt.pie(valores, labels=rotulos_validos, autopct='%1.1f%%')
-                plt.axis('equal')  # Aspecto igual garante que o gráfico seja desenhado como um círculo.
-
-                # Exibir o gráfico
-                st.pyplot(plt)
-
-            return dados_empresa  # Retornar todos os valores calculados
-
-        else:
-            st.error(f"A tabela '{empresa}' não existe no esquema 'Dados de coleta'.")
-
-    except psycopg2.Error as e:
-        st.error(f"Erro ao conectar ao banco de dados: {e}")
 
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
