@@ -579,7 +579,6 @@ def collection_form():
         
         if submit_button_relatorio:
             # Buscar valores para criar gráfico e obter dados necessários
-            dados_empresa = buscar_valores_e_criar_grafico(senha_relatorio, data_inicio, data_fim)
             
             # Verificar se dados_empresa foi obtido com sucesso
             if dados_empresa:
