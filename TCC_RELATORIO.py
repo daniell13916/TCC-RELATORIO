@@ -484,7 +484,10 @@ def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
                         st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_destinado_corretamente, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
                         st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
                         st.write("Porcentagem de cada tipo de material em relação ao peso total")
-    
+                        
+                        # Chamar a função para criar o gráfico
+                        buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+
                         # Calcular economias com base nas proporções
                         proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
                         if proporcoes:
@@ -549,7 +552,6 @@ def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
         st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
-
 
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
