@@ -523,8 +523,6 @@ def collection_form():
 # Chamada para iniciar o formulário de coleta
 collection_form()
 
-collection_form()
-
 # Criar a tabela de usuários se ainda não existir
 create_user_table()
 
