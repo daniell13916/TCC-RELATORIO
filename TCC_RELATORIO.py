@@ -553,7 +553,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
-# Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
     with st.form("registro_coleta_form"):
@@ -579,7 +578,7 @@ def collection_form():
         
         if submit_button_relatorio:
             # Buscar os dados uma vez antes de chamar generate_report
-            dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+            dados_empresa = buscar_valores_e_criar_grafico(senha_relatorio, data_inicio, data_fim)
             generate_report(senha_relatorio, data_inicio, data_fim, dados_empresa)
 
 # Chamada para iniciar o formulário de coleta
