@@ -460,10 +460,7 @@ def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
     
                 if porcentagem_rejeitos is not None:
                     porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
-    
-                    # Buscar valores para criar gráfico e obter dados necessários
-                
-    
+
                     if dados_empresa:
                         volume_total = dados_empresa[0]
                         nao_reciclado = dados_empresa[7]
@@ -487,8 +484,6 @@ def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
     
                         st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
                         st.write("Porcentagem de cada tipo de material em relação ao peso total")
-    
-                        # Chamar a função para buscar os valores das colunas e criar o gráfico
                         # Buscar valores para criar gráfico e obter dados necessários
                         dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
