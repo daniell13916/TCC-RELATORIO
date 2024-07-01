@@ -435,7 +435,7 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Buscar valores para criar gráfico e obter dados necessários apenas uma vez
-        dados_empresa =! 0
+        dados_empresa != 0
         
         if dados_empresa:
             # Restante do código para gerar o relatório
