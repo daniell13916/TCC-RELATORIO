@@ -460,7 +460,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
 
             st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
             st.write("Porcentagem de cada tipo de material em relação ao peso total")
-            dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
             # Calcular economias com base nas proporções
             proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
