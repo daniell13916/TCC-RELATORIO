@@ -433,11 +433,8 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
     }
 
 # Função para gerar o relatório
-def generate_report(senha_empresa, data_inicio, data_fim):
+def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
     try:
-        # Buscar valores para criar gráfico e obter dados necessários apenas uma vez
-        dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
-        
         if dados_empresa:
             # Realizar cálculos com base nos dados obtidos
             volume_total = dados_empresa[0]
@@ -463,38 +460,11 @@ def generate_report(senha_empresa, data_inicio, data_fim):
             if proporcoes:
                 resultado = calcular_economias(*proporcoes, volume_destinado_corretamente)
     
-                # Exibir resultados das economias
+                # Exibir resultados das economias (exemplo de código, ajuste conforme necessário)
                 st.markdown("<h2 style='color: #38b6ff;'>Ganhos Ambientais</h2>", unsafe_allow_html=True)
-                st.write("Dados dos ganhos ambientais na preservação do meio ambiente alcançados com a destinação correta dos resíduos recicláveis e orgânicos.")
-    
-                # Dividindo os resultados em uma matriz 3x2
-                num_rows = 3
-                num_cols = 2
-                resultados = list(resultado.items())
-    
-                # Dicionário de emojis correspondentes aos diferentes tipos de economias
-                emojis = {
-                    "Economia de Energia (kWh)": "💡",
-                    "Economia de Água (litros)": "💧",
-                    "Redução de CO2 (kg)": "🌍",
-                    "Redução de Volume no Aterro (litros)": "♻️",
-                    "Economia de Árvores (%)": "🌳",
-                    "Economia de Petróleo (litros)": "⛽"
-                }
-    
-                for i in range(num_rows):
-                    for j in range(num_cols):
-                        index = i * num_cols + j
-                        if index < len(resultados):
-                            chave, valor = resultados[index]
-                            # Adicionar emoji correspondente à economia
-                            emoji = emojis.get(chave, "")
-                            # Criar a moldura com o emoji e o valor
-                            st.markdown(f"<div style='border: 1px solid black; padding: 20px; text-align: center; color: #38b6ff;'>{emoji} {chave}: {valor}</div>", unsafe_allow_html=True)
-                        else:
-                            # Criar uma moldura vazia
-                            st.markdown("<div style='border: 1px solid black; padding: 20px;'></div>", unsafe_allow_html=True)
-    
+                for chave, valor in resultado.items():
+                    st.write(f"{chave}: {valor}")
+                    
                 # Colorindo os títulos em azul
                 st.markdown(
                     """
@@ -518,11 +488,8 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     
     except TypeError:
         st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
-    except psycopg2.Error as e:
-        st.error(f"Erro ao conectar no banco de dados: {e}")
-
-
-
+    except Exception as e:
+        st.error(f"Erro ao gerar relatório: {e}")
 
 # Função para exibir o formulário de coleta
 def collection_form():
@@ -549,8 +516,13 @@ def collection_form():
         submit_button_relatorio = st.form_submit_button("Gerar Relatório")
         
         if submit_button_relatorio:
-            # Chama generate_report com os parâmetros necessários
-            generate_report(senha_relatorio, data_inicio, data_fim)
+            # Buscar os dados uma vez antes de chamar generate_report
+            dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+            generate_report(senha_relatorio, data_inicio, data_fim, dados_empresa)
+
+# Chamada para iniciar o formulário de coleta
+collection_form()
+
 collection_form()
 
 # Criar a tabela de usuários se ainda não existir
