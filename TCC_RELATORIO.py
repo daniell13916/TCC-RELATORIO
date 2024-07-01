@@ -461,7 +461,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                 if porcentagem_rejeitos is not None:
                     porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
                     #Buscar valores para criar gráfico e obter dados necessários
-                    dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+                    st.write(" ")
     
                     if dados_empresa:
                         volume_total = dados_empresa[0]
@@ -490,6 +490,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         # Chamar a função para buscar os valores das colunas e criar o gráfico
                          # Buscar valores para criar gráfico e obter dados necessários
                         st.write(" ")
+                        dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
                         # Calcular economias com base nas proporções
                         proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
