@@ -460,8 +460,15 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     
                 if porcentagem_rejeitos is not None:
                     porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
-
     
+                    # Consulta SQL para obter os dados de coleta da empresa no período especificado
+                    cur.execute(f"""
+                        SELECT data, volume
+                        FROM "Dados de coleta".{empresa}
+                        WHERE data >= %s AND data <= %s;
+                    """, (data_inicio, data_fim))
+                    coleta_data = cur.fetchall()
+
                     if dados_empresa:
                         volume_total = dados_empresa[0]
                         nao_reciclado = dados_empresa[7]
