@@ -431,22 +431,24 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
         "Economia de Árvores (%)": round(economia_arvores, 2),
         "Economia de Petróleo (litros)": round(economia_petroleo, 2)
     }
+
 # Função para gerar o relatório
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
-        
-        # Restante do código para gerar o relatório
-        volume_total = dados_empresa[0]
-        nao_reciclado = dados_empresa[7]
-        volume_destinado_corretamente = volume_total - nao_reciclado
-        total_coletas = len(dados_empresa)
-        
-        # Formatação da data do relatório
-        data_relatorio = time.strftime("%d de %B de %Y")
-        data_inicio_formatada = data_inicio.strftime("%d/%m/%Y")
-        data_fim_formatada = data_fim.strftime("%d/%m/%Y")
-                # Buscar valores para criar gráfico e obter dados necessários apenas uma vez
+        # Buscar valores para criar gráfico e obter dados necessários apenas uma vez
         dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+        
+        if dados_empresa:
+            # Realizar cálculos com base nos dados obtidos
+            volume_total = dados_empresa[0]
+            nao_reciclado = dados_empresa[7]
+            volume_destinado_corretamente = volume_total - nao_reciclado
+            total_coletas = len(dados_empresa)
+            
+            # Formatação da data do relatório
+            data_relatorio = time.strftime("%d de %B de %Y")
+            data_inicio_formatada = data_inicio.strftime("%d/%m/%Y")
+            data_fim_formatada = data_fim.strftime("%d/%m/%Y")
             
             # Escrita do relatório
             st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
@@ -456,8 +458,9 @@ def generate_report(senha_empresa, data_inicio, data_fim):
             st.write(f"Foi considerada uma perda de {round(nao_reciclado, 2)} kg de rejeito ou materiais não recicláveis nos recipientes de coleta.")
             st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_destinado_corretamente, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
     
-            st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
-            st.write("Porcentagem de cada tipo de material em relação ao peso total")
+            # Não exibir o gráfico, apenas realizar os cálculos necessários
+            # st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
+            # st.write("Porcentagem de cada tipo de material em relação ao peso total")
     
             # Calcular economias com base nas proporções
             proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
@@ -522,7 +525,8 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
-        
+
+
 # Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
