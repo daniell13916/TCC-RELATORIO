@@ -293,7 +293,6 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
 
-
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -479,20 +478,15 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         data_inicio_formatada = data_inicio.strftime("%d/%m/%Y")
                         data_fim_formatada = data_fim.strftime("%d/%m/%Y")
                         
-                        # Exibir gráfico antes do relatório
-                        st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
-                        st.write("Porcentagem de cada tipo de material em relação ao peso total")
-    
-                        # Chamar a função para buscar os valores das colunas e criar o gráfico
-                        buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
-    
-                        # Escrita do relatório após o gráfico
+                        # Escrita do relatório
                         st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
                         st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
                         st.write(f"Uberlândia, {data_relatorio}")
                         st.write(f"No período entre {data_inicio_formatada} a {data_fim_formatada} foram feitas {total_coletas} coletas, totalizando cerca de {round(volume_total, 2)} kg coletados.")
                         st.write(f"Foi considerada uma perda de {round(nao_reciclado, 2)} kg de rejeito ou materiais não recicláveis nos recipientes de coleta.")
                         st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_destinado_corretamente, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
+                        st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
+                        st.write("Porcentagem de cada tipo de material em relação ao peso total")
     
                         # Calcular economias com base nas proporções
                         proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
@@ -558,7 +552,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
         st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
-
 
 # Função para exibir o formulário de coleta
 def collection_form():
