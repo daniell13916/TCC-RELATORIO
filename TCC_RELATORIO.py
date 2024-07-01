@@ -431,7 +431,6 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
         "Economia de Árvores (%)": round(economia_arvores, 2),
         "Economia de Petróleo (litros)": round(economia_petroleo, 2)
     }
-
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -469,6 +468,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         volume_total = dados_empresa[0]
                         nao_reciclado = dados_empresa[7]
                         volume_destinado_corretamente = volume_total - nao_reciclado
+                        total_coletas = len(dados_empresa)
     
                         # Formatação da data do relatório
                         data_relatorio = time.strftime("%d de %B de %Y")
@@ -551,6 +551,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
         st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
+
 
         
 # Função para exibir o formulário de coleta
