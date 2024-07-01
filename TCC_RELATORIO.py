@@ -582,7 +582,7 @@ def collection_form():
         submit_button_relatorio = st.form_submit_button("Gerar Relatório")
         
         if submit_button_relatorio:
-            generate_report(senha_relatorio, data_inicio, data_fim)
+            generate_report(senha_relatorio, data_inicio, data_fim,  dados_empresa)
 
 collection_form()
 
