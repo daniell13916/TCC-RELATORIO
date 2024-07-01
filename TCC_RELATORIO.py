@@ -489,7 +489,8 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         st.write("Porcentagem de cada tipo de material em relação ao peso total")
     
                         # Chamar a função para buscar os valores das colunas e criar o gráfico
-                        buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+                        # Esta linha foi movida para dentro da seção de escrita do relatório
+                        # buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
                         # Calcular economias com base nas proporções
                         proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
@@ -556,9 +557,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
-
-
-        
 # Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
