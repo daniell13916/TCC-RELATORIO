@@ -558,6 +558,7 @@ def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
 # Função para exibir o formulário de coleta
+# Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
     with st.form("registro_coleta_form"):
@@ -582,7 +583,16 @@ def collection_form():
         submit_button_relatorio = st.form_submit_button("Gerar Relatório")
         
         if submit_button_relatorio:
-            generate_report(senha_relatorio, data_inicio, data_fim,  dados_empresa)
+            # Buscar valores para criar gráfico e obter dados necessários
+            dados_empresa = buscar_valores_e_criar_grafico(senha_relatorio, data_inicio, data_fim)
+            
+            # Verificar se dados_empresa foi obtido com sucesso
+            if dados_empresa:
+                # Chamando a função generate_report com os parâmetros necessários
+                generate_report(senha_relatorio, data_inicio, data_fim, dados_empresa)
+            else:
+                st.error("Não foi possível obter os dados necessários para gerar o relatório. Verifique as datas e a senha da empresa.")
+
 
 collection_form()
 
