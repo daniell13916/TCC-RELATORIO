@@ -461,21 +461,11 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                 if porcentagem_rejeitos is not None:
                     porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
     
-                    # Consulta SQL para obter os dados de coleta da empresa no período especificado
-                    cur.execute(f"""
-                        SELECT data, volume
-                        FROM "Dados de coleta".{empresa}
-                        WHERE data >= %s AND data <= %s;
-                    """, (data_inicio, data_fim))
-                    coleta_data = cur.fetchall()
-    
-                    if coleta_data:
-                        # Cálculo do total de coletas e volume coletado
-                        total_coletas = len(coleta_data)
-                        total_volume_coletado = sum(float(row[1]) for row in coleta_data)  # Convertendo para float
-                        perda_rejeito = total_volume_coletado * (porcentagem_rejeitos / 100)
-                        volume_nao_reciclado = perda_rejeito
-                        volume_reciclado = total_volume_coletado - volume_nao_reciclado
+                    if dados_empresa:
+                        volume_total = dados_empresa[0]
+                        nao_reciclado = dados_empresa[7]
+                        volume_destinado_corretamente = volume_total - nao_reciclado
+                        total_coletas = len(dados_empresa)
     
                         # Formatação da data do relatório
                         data_relatorio = time.strftime("%d de %B de %Y")
@@ -488,17 +478,21 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
                         st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
                         st.write(f"Uberlândia, {data_relatorio}")
-                        st.write(f"No período entre {data_inicio_formatada} a {data_fim_formatada} foram feitas {total_coletas} coletas, totalizando cerca de {round(total_volume_coletado, 2)} kg coletados.")
-                        st.write(f"Foi considerada uma perda de {porcentagem_rejeitos}% de rejeito ou materiais não recicláveis nos recipientes de coleta.")
-                        st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_reciclado, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
-                        
+                        st.write(f"No período entre {data_inicio_formatada} a {data_fim_formatada} foram feitas {total_coletas} coletas, totalizando cerca de {round(volume_total, 2)} kg coletados.")
+                        st.write(f"Foi considerada uma perda de {round(nao_reciclado, 2)} kg de rejeito ou materiais não recicláveis nos recipientes de coleta.")
+                        st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_destinado_corretamente, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
+    
+                        st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
+                        st.write("Porcentagem de cada tipo de material em relação ao peso total")
+    
                         # Chamar a função para buscar os valores das colunas e criar o gráfico
-                        buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+                        # Buscar valores para criar gráfico e obter dados necessários
+                        dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
                         # Calcular economias com base nas proporções
                         proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
                         if proporcoes:
-                            resultado = calcular_economias(*proporcoes, volume_reciclado)
+                            resultado = calcular_economias(*proporcoes, volume_destinado_corretamente)
     
                             # Exibir resultados das economias
                             st.markdown("<h2 style='color: #38b6ff;'>Ganhos Ambientais</h2>", unsafe_allow_html=True)
@@ -553,7 +547,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                     else:
                         st.error("Não há dados de coleta para o período especificado.")
                 else:
-                    st.error("Porcentagem de rejeitos não encontrada.")
+                    st.write(" ")
             else:
                 st.error("Senha da empresa não encontrada.")
             
