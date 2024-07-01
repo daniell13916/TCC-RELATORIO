@@ -434,7 +434,7 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
 # Função para gerar o relatório
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
-        # Buscar valores para criar gráfico e obter dados necessários
+        # Buscar valores para criar gráfico e obter dados necessários apenas uma vez
         dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
         
         if dados_empresa:
@@ -459,10 +459,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     
             st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
             st.write("Porcentagem de cada tipo de material em relação ao peso total")
-    
-            # Chamar a função para buscar os valores das colunas e criar o gráfico
-            # A chamada para buscar_valores_e_criar_grafico() está aqui agora
-            dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
             # Calcular economias com base nas proporções
             proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
