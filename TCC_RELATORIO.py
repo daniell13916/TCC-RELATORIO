@@ -473,23 +473,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         # Cálculo do total de coletas e volume coletado
                         total_coletas = len(coleta_data)
                         total_volume_coletado = sum(float(row[1]) for row in coleta_data)  # Convertendo para float
-                        
-                        # Consulta SQL para obter os dados da soma dos resíduos no período especificado
-                        cur.execute(f"""
-                            SELECT 
-                                SUM(plastico), 
-                                SUM(vidro), 
-                                SUM(papel_e_papelao), 
-                                SUM(aluminio), 
-                                SUM(outros_metais), 
-                                SUM(embalagem_longa_vida),
-                                SUM(volume) - COALESCE(SUM(plastico), 0) - COALESCE(SUM(vidro), 0) - COALESCE(SUM(papel_e_papelao), 0) - COALESCE(SUM(aluminio), 0) - COALESCE(SUM(outros_metais), 0) - COALESCE(SUM(embalagem_longa_vida), 0) AS nao_reciclado
-                            FROM "Dados de coleta".{empresa}
-                            WHERE data >= %s AND data <= %s;
-                        """, (data_inicio, data_fim))
-                        dados_empresa = cur.fetchone()
-    
-                        perda_rejeito = dados_empresa[-1]  # Valor de "Não reciclado"
+                        perda_rejeito = total_volume_coletado * (porcentagem_rejeitos / 100)
                         volume_destinado_corretamente = total_volume_coletado - perda_rejeito
     
                         # Formatação da data do relatório
@@ -504,7 +488,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         st.write("Plano de Gerenciamento de Resíduos Sólidos (PGRS)")
                         st.write(f"Uberlândia, {data_relatorio}")
                         st.write(f"No período entre {data_inicio_formatada} a {data_fim_formatada} foram feitas {total_coletas} coletas, totalizando cerca de {round(total_volume_coletado, 2)} kg coletados.")
-                        st.write(f"Foi considerada uma perda de {round(perda_rejeito, 2)} kg de rejeito ou materiais não recicláveis nos recipientes de coleta.")
+                        st.write(f"Foi considerado como 'Não reciclado' {round(perda_rejeito, 2)} kg de rejeito ou materiais não recicláveis nos recipientes de coleta.")
                         st.write(f"Ao final do período conseguimos destinar corretamente {round(volume_destinado_corretamente, 2)} kg, reinserindo-os na economia circular, através da reciclagem e da compostagem.")
                         st.markdown("<h2 style='color: #38b6ff;'>Análise Gravimétrica</h2>", unsafe_allow_html=True)
                         st.write("Porcentagem de cada tipo de material em relação ao peso total")
@@ -576,9 +560,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
         st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
-
-
-
+        
 # Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
