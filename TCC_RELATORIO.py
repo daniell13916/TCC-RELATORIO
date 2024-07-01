@@ -461,7 +461,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                 if porcentagem_rejeitos is not None:
                     porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
                     #Buscar valores para criar gráfico e obter dados necessários
-                    dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+                    dados_empresa = st.wriete(" ")
                     
     
                     if dados_empresa:
