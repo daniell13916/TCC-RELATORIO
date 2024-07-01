@@ -434,20 +434,19 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
 # Função para gerar o relatório
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
-        # Buscar valores para criar gráfico e obter dados necessários apenas uma vez
-        dados_empresa != 0
         
-        if dados_empresa:
-            # Restante do código para gerar o relatório
-            volume_total = dados_empresa[0]
-            nao_reciclado = dados_empresa[7]
-            volume_destinado_corretamente = volume_total - nao_reciclado
-            total_coletas = len(dados_empresa)
-            
-            # Formatação da data do relatório
-            data_relatorio = time.strftime("%d de %B de %Y")
-            data_inicio_formatada = data_inicio.strftime("%d/%m/%Y")
-            data_fim_formatada = data_fim.strftime("%d/%m/%Y")
+        # Restante do código para gerar o relatório
+        volume_total = dados_empresa[0]
+        nao_reciclado = dados_empresa[7]
+        volume_destinado_corretamente = volume_total - nao_reciclado
+        total_coletas = len(dados_empresa)
+        
+        # Formatação da data do relatório
+        data_relatorio = time.strftime("%d de %B de %Y")
+        data_inicio_formatada = data_inicio.strftime("%d/%m/%Y")
+        data_fim_formatada = data_fim.strftime("%d/%m/%Y")
+                # Buscar valores para criar gráfico e obter dados necessários apenas uma vez
+        dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
             
             # Escrita do relatório
             st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
