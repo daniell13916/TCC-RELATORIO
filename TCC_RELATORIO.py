@@ -431,7 +431,7 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
         "Economia de Árvores (%)": round(economia_arvores, 2),
         "Economia de Petróleo (litros)": round(economia_petroleo, 2)
     }
-def generate_report(senha_empresa, data_inicio, data_fim):
+def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
@@ -462,7 +462,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                     porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
     
                     # Buscar valores para criar gráfico e obter dados necessários
-                    dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+                
     
                     if dados_empresa:
                         volume_total = dados_empresa[0]
@@ -489,8 +489,8 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                         st.write("Porcentagem de cada tipo de material em relação ao peso total")
     
                         # Chamar a função para buscar os valores das colunas e criar o gráfico
-                        # Esta linha foi movida para dentro da seção de escrita do relatório
-                        # buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+                        # Buscar valores para criar gráfico e obter dados necessários
+                        dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
     
                         # Calcular economias com base nas proporções
                         proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
