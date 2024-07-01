@@ -251,7 +251,8 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
                     SUM(papel_e_papelao), 
                     SUM(aluminio), 
                     SUM(outros_metais), 
-                    SUM(embalagem_longa_vida)
+                    SUM(embalagem_longa_vida),
+                    SUM(volume) - COALESCE(SUM(plastico), 0) - COALESCE(SUM(vidro), 0) - COALESCE(SUM(papel_e_papelao), 0) - COALESCE(SUM(aluminio), 0) - COALESCE(SUM(outros_metais), 0) - COALESCE(SUM(embalagem_longa_vida), 0) AS nao_reciclado
                 FROM "Dados de coleta".{empresa}
                 WHERE data >= %s AND data <= %s;
             """
@@ -267,7 +268,7 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
             # Filtrar os valores válidos (diferentes de zero e não None)
             rotulos = [
                 "Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais",
-                "Embalagem Longa Vida"
+                "Embalagem Longa Vida", "Não reciclado"
             ]
 
             valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa) if valor is not None and valor != 0]
