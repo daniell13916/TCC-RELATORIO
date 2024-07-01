@@ -578,16 +578,14 @@ def collection_form():
         senha_relatorio = st.text_input("Senha da Empresa para Relatório", type="password")
         submit_button_relatorio = st.form_submit_button("Gerar Relatório")
         
-        if submit_button_relatorio:
-            # Buscar valores para criar gráfico e obter dados necessários
-            dados_empresa = st.write(" ")
-            
-            # Verificar se dados_empresa foi obtido com sucesso
-            if dados_empresa:
-                # Chamando a função generate_report com os parâmetros necessários
-                generate_report(senha_relatorio, data_inicio, data_fim, dados_empresa)
-            else:
-                st.error("Não foi possível obter os dados necessários para gerar o relatório. Verifique as datas e a senha da empresa.")
+
+        
+        # Verificar se dados_empresa foi obtido com sucesso
+        if dados_empresa:
+            # Chamando a função generate_report com os parâmetros necessários
+            generate_report(senha_relatorio, data_inicio, data_fim, dados_empresa)
+        else:
+            st.error("Não foi possível obter os dados necessários para gerar o relatório. Verifique as datas e a senha da empresa.")
 
 collection_form()
 
