@@ -243,9 +243,15 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
         tabela_existe = cur.fetchone()[0]
 
         if tabela_existe:
-            # Montar a consulta para obter os dados da tabela da empresa no intervalo de tempo especificado
+            # Montar a consulta para obter a soma dos dados da tabela da empresa no intervalo de tempo especificado
             consulta_dados_empresa = f"""
-                SELECT AVG(plastico), AVG(vidro), AVG(papel_e_papelao), AVG(aluminio), AVG(outros_metais), AVG(embalagem_longa_vida), SUM(volume)
+                SELECT 
+                    SUM(plastico), 
+                    SUM(vidro), 
+                    SUM(papel_e_papelao), 
+                    SUM(aluminio), 
+                    SUM(outros_metais), 
+                    SUM(embalagem_longa_vida)
                 FROM "Dados de coleta".{empresa}
                 WHERE data >= %s AND data <= %s;
             """
@@ -264,25 +270,11 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
                 "Embalagem Longa Vida"
             ]
 
-            valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa[:-1]) if valor is not None and valor != 0]
-
-            total_volume = dados_empresa[-1]  # Total volume coletado
-            soma_materiais = sum(valor for _, valor in valores_validos)  # Soma dos materiais recicláveis
-            nao_reciclado = total_volume - soma_materiais  # Calcular o volume não reciclado
-
-            # Mostrar os valores para depuração
-            st.write("Total volume coletado:", total_volume)
-            st.write("Valores dos materiais recicláveis:", valores_validos)
-            st.write("Volume não reciclado:", nao_reciclado)
+            valores_validos = [(rotulo, valor) for rotulo, valor in zip(rotulos, dados_empresa) if valor is not None and valor != 0]
 
             if valores_validos:
                 rotulos_validos, valores = zip(*valores_validos)
                 
-                # Adicionar o setor "Não reciclado" se houver volume não reciclado
-                if nao_reciclado > 0:
-                    rotulos_validos += ("Não reciclado",)
-                    valores += (nao_reciclado,)
-
                 # Criar o gráfico de pizza
                 plt.figure(figsize=(8, 8))
                 plt.pie(valores, labels=rotulos_validos, autopct='%1.1f%%')
@@ -298,7 +290,6 @@ def buscar_valores_e_criar_grafico(senha, data_inicio, data_fim):
 
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
-
 
 def buscar_valores_proporcoes(senha, data_inicio, data_fim):
     try:
