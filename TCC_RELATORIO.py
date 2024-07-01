@@ -432,7 +432,7 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
         "Economia de Petróleo (litros)": round(economia_petroleo, 2)
     }
 
-def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
+def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
         conn = psycopg2.connect(
@@ -462,11 +462,24 @@ def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
                 if porcentagem_rejeitos is not None:
                     porcentagem_rejeitos = float(porcentagem_rejeitos[0])  # Converter para float
     
-                    if dados_empresa:
-                        volume_total = dados_empresa[0]
-                        nao_reciclado = dados_empresa[7]
+                    # Consulta SQL para obter os dados de coleta da empresa no período especificado
+                    cur.execute(f"""
+                        SELECT data, volume
+                        FROM "Dados de coleta".{empresa}
+                        WHERE data >= %s AND data <= %s;
+                    """, (data_inicio, data_fim))
+                    coleta_data = cur.fetchall()
+    
+                    if coleta_data:
+                        # Cálculo do total de coletas e volume coletado
+                        total_coletas = len(coleta_data)
+                        volume_total = sum(float(row[1]) for row in coleta_data)  # Convertendo para float
+
+                        # Busca os valores das proporções de resíduos para cálculo do não reciclado
+                        dados_empresa = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
+                        nao_reciclado = volume_total - sum(dados_empresa)
+
                         volume_destinado_corretamente = volume_total - nao_reciclado
-                        total_coletas = len(dados_empresa)
     
                         # Formatação da data do relatório
                         data_relatorio = time.strftime("%d de %B de %Y")
@@ -553,6 +566,7 @@ def generate_report(senha_empresa, data_inicio, data_fim, dados_empresa):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
+# Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
     with st.form("registro_coleta_form"):
@@ -577,9 +591,7 @@ def collection_form():
         submit_button_relatorio = st.form_submit_button("Gerar Relatório")
         
         if submit_button_relatorio:
-            # Buscar os dados uma vez antes de chamar generate_report
-            dados_empresa = buscar_valores_e_criar_grafico(senha_relatorio, data_inicio, data_fim)
-            generate_report(senha_relatorio, data_inicio, data_fim, dados_empresa)
+            generate_report(senha_relatorio, data_inicio, data_fim)
 
 # Chamada para iniciar o formulário de coleta
 collection_form()
