@@ -489,7 +489,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     
                         # Chamar a função para buscar os valores das colunas e criar o gráfico
                          # Buscar valores para criar gráfico e obter dados necessários
-                        dados_empresa = buscar_valores_e_criar_grafico(senha_empresa, data_inicio, data_fim)
+                        st.write(" ")
     
                         # Calcular economias com base nas proporções
                         proporcoes = buscar_valores_proporcoes(senha_empresa, data_inicio, data_fim)
