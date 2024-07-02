@@ -432,6 +432,7 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
         "Economia de Petróleo (litros)": round(economia_petroleo, 2)
     }
 
+# Função para gerar o relatório
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -577,10 +578,14 @@ def collection_form():
         ano = st.number_input("Ano", min_value=2024)
         volume = st.number_input("Volume Coletado (Kg)", min_value=0.01)
         senha_empresa = st.text_input("Senha da Empresa", type="password")
-
+        
+        materiais = ["Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais", "Embalagem Longa Vida"]
+        materiais_selecionados = st.multiselect("Materiais Coletados", materiais)
+        volumes_materiais = {material: st.number_input(f"Volume de {material} (Kg)", min_value=0.01) for material in materiais_selecionados}
+        
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
-            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume)
+            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume, volumes_materiais)
             st.write(result_message)
 
     with st.form("gerar_relatorio_form"):
