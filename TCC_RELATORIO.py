@@ -431,7 +431,6 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
         "Economia de Árvores (%)": round(economia_arvores, 2),
         "Economia de Petróleo (litros)": round(economia_petroleo, 2)
     }
-# Função para gerar o relatório
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
         # Conectar ao banco de dados PostgreSQL
@@ -551,7 +550,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                             )
     
                             st.write("Fonte: Cálculos desenvolvidos pelo Cataki em parceria com o Instituto GEA.")
-                            st.markdown("<h2 style='color: #38b6ff;'>Gabriela Brant</h2>", unsafe_allowhtml=True)
+                            st.markdown("<h2 style='color: #38b6ff;'>Gabriela Brant</h2>", unsafe_allow_html=True)
                             st.write("Responsável Técnica Seu Lixo LTDA")
                             st.markdown("<h2 style='color: #38b6ff;'>Alexandre Corrêa</h2>", unsafe_allow_html=True)
                             st.write("Diretor Seu Lixo LTDA")
@@ -566,7 +565,6 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
-
 # Função para exibir o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
@@ -578,17 +576,10 @@ def collection_form():
         ano = st.number_input("Ano", min_value=2024)
         volume = st.number_input("Volume Coletado (Kg)", min_value=0.01)
         senha_empresa = st.text_input("Senha da Empresa", type="password")
-        
-        materiais = ["Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais", "Embalagem Longa Vida"]
-        materiais_selecionados = st.multiselect("Materiais Coletados", materiais)
-        
-        volumes_materiais = {}
-        for material in materiais_selecionados:
-            volumes_materiais[material] = st.number_input(f"Volume de {material} (Kg)", min_value=0.01, key=material)
 
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
-            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume, volumes_materiais)
+            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume)
             st.write(result_message)
 
     with st.form("gerar_relatorio_form"):
