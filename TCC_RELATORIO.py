@@ -431,7 +431,6 @@ def calcular_economias( aluminio, papel_papelao, vidro, plastico, embalagem_long
         "Economia de Árvores (%)": round(economia_arvores, 2),
         "Economia de Petróleo (litros)": round(economia_petroleo, 2)
     }
-
 # Função para gerar o relatório
 def generate_report(senha_empresa, data_inicio, data_fim):
     try:
