@@ -574,12 +574,27 @@ def collection_form():
         dia = st.number_input("Dia", min_value=1, max_value=31)
         mes = st.number_input("Mês", min_value=1, max_value=12)
         ano = st.number_input("Ano", min_value=2024)
-        volume = st.number_input("Volume Coletado (Kg)", min_value=0.01)
+        volume_total = st.number_input("Volume Coletado (Kg)", min_value=0.01)
+
+        # Campos para inserção dos volumes de cada tipo de material
+        materiais_selecionados = [
+            "Plástico",
+            "Vidro",
+            "Papel e Papelão",
+            "Alumínio",
+            "Outros Metais",
+            "Embalagem Longa Vida"
+        ]
+
+        volumes = {}
+        for material in materiais_selecionados:
+            volumes[material] = st.number_input(f"Volume {material} (Kg)", min_value=0.0, value=0.0)
+
         senha_empresa = st.text_input("Senha da Empresa", type="password")
 
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
-            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume)
+            result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume_total, volumes)
             st.write(result_message)
 
     with st.form("gerar_relatorio_form"):
