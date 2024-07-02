@@ -177,30 +177,41 @@ def register():
       st.write(" ")
 register()
 
-#ve se a tabela já existe e se tiver vai add os dados e se não tiver vai criar tabela com base na função create_empresa
-def check_table_existence(senha_empresa, username, dia, mes, ano, volume):
+# Função para verificar a existência da tabela e adicionar dados
+def check_table_existence(senha_empresa, username, dia, mes, ano, volume, volumes):
     try:
-        # Abrir um cursor para executar consultas SQL
+        # Conectar ao banco de dados PostgreSQL
+        conn = psycopg2.connect(
+            host="seulixo-aws.c7my4s6c6mqm.us-east-1.rds.amazonaws.com",
+            database="postgres",
+            user="postgres",
+            password="#SEUlixo321"
+        )
+        
         with conn.cursor() as cur:
             # Consulta SQL para verificar se a senha existe na tabela users e obter o ID e a empresa
             cur.execute("SELECT id, empresa FROM public.users WHERE password = %s;", (senha_empresa,))
             empresa_info = cur.fetchone()
+            
             if empresa_info:
                 user_id, empresa = empresa_info
                 
                 # Verificar a existência da tabela
                 cur.execute("SELECT EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema = 'Dados de coleta' AND table_name = %s);", (empresa,))
                 table_exists = cur.fetchone()[0]
+
                 if table_exists:
                     # Insere os dados na tabela existente
                     cur.execute(f"""
-                        INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, volume, nome_coletor)
-                        VALUES (%s, %s, %s, %s, %s);
-                    """, (f'{ano}-{mes}-{dia}', mes, ano, volume, username))
+                        INSERT INTO "Dados de coleta".{empresa} (data, mes, ano, volume, nome_coletor, plastico, vidro, papel_e_papelao, aluminio, outros_metais, embalagem_longa_vida)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                    """, (f'{ano}-{mes}-{dia}', mes, ano, volume, username, volumes["Plástico"], volumes["Vidro"], volumes["Papel e Papelão"], volumes["Alumínio"], volumes["Outros Metais"], volumes["Embalagem Longa Vida"]))
                     conn.commit()
                     return f"Dados inseridos na tabela '{empresa}'."
                 else:
-                    return f"A tabela '{empresa}' não existe."
+                    # Se a tabela não existir, criar a tabela
+                    create_empresa(cur, empresa)
+                    return f"A tabela '{empresa}' foi criada e os dados foram inseridos."
             else:
                 # Senha da empresa não encontrada, adicionar link "Criar conta"
                 return "Senha da empresa não encontrada. [Criar conta](https://seulixo.streamlit.app/)"
@@ -565,6 +576,7 @@ def generate_report(senha_empresa, data_inicio, data_fim):
     except psycopg2.Error as e:
         st.error(f"Erro ao conectar no banco de dados: {e}")
 
+# Exemplo de chamada para o formulário de coleta
 def collection_form():
     st.markdown("<h1 style='color: #38b6ff;'>Relatório de Coleta</h1>", unsafe_allow_html=True)
     with st.form("registro_coleta_form"):
