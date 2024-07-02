@@ -551,21 +551,19 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                                 unsafe_allow_html=True
                             )
     
-                            st.write("Fonte: Cálculos desenvolvidos pelo Cataki em parceria com o Instituto GEA.")
-                            st.markdown("<h2 style='color: #38b6ff;'>Gabriela Brant</h2>", unsafe_allow_html=True)
-                            st.write("Responsável Técnica Seu Lixo LTDA")
-                            st.markdown("<h2 style='color: #38b6ff;'>Alexandre Corrêa</h2>", unsafe_allow_html=True)
-                            st.write("Diretor Seu Lixo LTDA")
-    
+                            # Mensagem final do relatório
+                            st.write("Através deste relatório podemos observar os ganhos ambientais obtidos com a destinação correta dos resíduos.")
                     else:
-                        st.error("Não há dados de coleta para o período especificado.")
+                        st.write("Nenhum dado de coleta encontrado para o período especificado.")
+                else:
+                    st.write("Senha inválida.")
             else:
-                st.error("Senha da empresa não encontrada.")
-            
-    except TypeError:
-        st.error("Dados sobre as proporções de resíduos ausentes. Peça para o moderador fazer uma avaliação ou inserir os dados após a análise.")
-    except psycopg2.Error as e:
-        st.error(f"Erro ao conectar no banco de dados: {e}")
+                st.write("Senha inválida.")
+    except Exception as e:
+        st.error(f"Erro ao gerar o relatório: {str(e)}")
+    finally:
+        if conn:
+            conn.close()
 
 # Função para exibir o formulário de coleta
 def collection_form():
@@ -581,8 +579,11 @@ def collection_form():
         
         materiais = ["Plástico", "Vidro", "Papel e Papelão", "Alumínio", "Outros Metais", "Embalagem Longa Vida"]
         materiais_selecionados = st.multiselect("Materiais Coletados", materiais)
-        volumes_materiais = {material: st.number_input(f"Volume de {material} (Kg)", min_value=0.01) for material in materiais_selecionados}
         
+        volumes_materiais = {}
+        for material in materiais_selecionados:
+            volumes_materiais[material] = st.number_input(f"Volume de {material} (Kg)", min_value=0.01)
+
         submit_button_cadastro = st.form_submit_button("Registrar Coleta")
         if submit_button_cadastro:
             result_message = check_table_existence(senha_empresa, username, dia, mes, ano, volume, volumes_materiais)
