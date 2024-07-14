@@ -6,20 +6,7 @@ import uuid
 from datetime import datetime
 import matplotlib.pyplot as plt
 import locale
-# Adiciona a imagem de plano de fundo e o estilo para ocupar toda a tela
-st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background: url("https://lh3.googleusercontent.com/pw/AP1GczMmpHRnbB_1-qEmLsLsuMQgL7-D3V91nrCKM_WlU4cA4yrPKO2vP8Pj3I_MssP3dlsv7HSLLwDh73kltLTLRm7aX3B5DALLaFlMNMXoCjPa8jhLFWw1vUfJcxqKCo5DK7gawaB45eueEkyEVUmizvVn=w1366-h768-s-no-gm?authuser=0");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+
 
 # Conectar ao banco de dados PostgreSQL
 conn = psycopg2.connect(
