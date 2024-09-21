@@ -548,10 +548,9 @@ def generate_report(senha_empresa, data_inicio, data_fim):
                             )
     
                             st.write("Fonte: Cálculos desenvolvidos pelo Cataki em parceria com o Instituto GEA.")
-                            st.markdown("<h2 style='color: #38b6ff;'>Gabriela Brant</h2>", unsafe_allow_html=True)
-                            st.write("Responsável Técnica Seu Lixo LTDA")
-                            st.markdown("<h2 style='color: #38b6ff;'>Alexandre Corrêa</h2>", unsafe_allow_html=True)
-                            st.write("Diretor Seu Lixo LTDA")
+                            st.markdown("<h2 style='color: #38b6ff;'>Daniel de Oliveira</h2>", unsafe_allow_html=True)
+                            st.write("Responsável Técnico")
+
     
                     else:
                         st.error("Não há dados de coleta para o período especificado.")
